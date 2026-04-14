@@ -884,6 +884,253 @@ tbody td {
 .toast-info    { background: var(--blue); color: #fff; }
 .toast-warn    { background: var(--yellow); color: #000; }
 
+/* ════════════════════════════════════
+   JOB DETAIL MODAL
+════════════════════════════════════ */
+.job-detail-modal { width: 700px; }
+
+.jdm-header {
+  padding: 18px 22px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.jdm-rego {
+  font-family: var(--mono);
+  font-size: 30px;
+  letter-spacing: 4px;
+  color: var(--text);
+  line-height: 1;
+}
+
+.jdm-meta {
+  font-size: 13px;
+  color: var(--text2);
+  margin-top: 5px;
+}
+
+.jdm-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.jdm-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+
+.jdm-col {
+  padding: 18px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.jdm-col:first-child {
+  border-right: 1px solid var(--border);
+}
+
+.jdm-section-title {
+  font-family: var(--head);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--accent);
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+.jdm-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.jdm-field label {
+  font-family: var(--head);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.jdm-inp {
+  background: var(--card2);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  color: var(--text);
+  font-family: var(--body);
+  font-size: 13px;
+  padding: 7px 10px;
+  outline: none;
+  transition: border-color 0.15s;
+  width: 100%;
+}
+.jdm-inp:focus { border-color: var(--accent); }
+.jdm-inp::placeholder { color: var(--muted); }
+.jdm-inp-mono { font-family: var(--mono); font-size: 16px; letter-spacing: 3px; text-transform: uppercase; }
+
+select.jdm-inp { cursor: pointer; }
+select.jdm-inp option { background: var(--card); }
+
+textarea.jdm-inp { resize: vertical; min-height: 72px; }
+
+/* Parts section inside job detail */
+.jdm-parts-area {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.jdm-parts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.jdm-part-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 6px 10px;
+  gap: 8px;
+}
+
+.jdm-part-name {
+  font-size: 12px;
+  font-weight: 500;
+  flex: 1;
+  color: var(--text);
+}
+
+.jdm-part-oem {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 1px;
+}
+
+.jdm-part-no-oem {
+  font-size: 10px;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.jdm-part-actions {
+  display: flex;
+  gap: 3px;
+}
+
+.jdm-add-part-row {
+  display: flex;
+  gap: 6px;
+}
+
+.jdm-add-part-row .jdm-inp { flex: 1; }
+
+/* Status badge */
+.status-select-wrap {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.status-btn {
+  font-family: var(--head);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  border-radius: 4px;
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.12s;
+  flex: 1;
+  text-align: center;
+}
+.status-btn:hover { color: var(--text); border-color: var(--text2); }
+.status-btn.active-waiting  { background: rgba(234,179,8,0.15);  color: var(--yellow); border-color: var(--yellow); }
+.status-btn.active-progress { background: rgba(59,130,246,0.15); color: var(--blue);   border-color: var(--blue); }
+.status-btn.active-approval { background: rgba(239,68,68,0.15);  color: var(--red);    border-color: var(--red); }
+.status-btn.active-done     { background: rgba(34,197,94,0.15);  color: var(--green);  border-color: var(--green); }
+
+.pri-btn-wrap {
+  display: flex;
+  gap: 6px;
+}
+.pri-btn {
+  font-family: var(--head);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 5px 10px;
+  border-radius: 4px;
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.12s;
+  flex: 1;
+  text-align: center;
+}
+.pri-btn:hover { color: var(--text); }
+.pri-btn.active-urgent { background: rgba(239,68,68,0.15);  color: #fca5a5; border-color: rgba(239,68,68,0.4); }
+.pri-btn.active-high   { background: rgba(249,115,22,0.15); color: #fdba74; border-color: rgba(249,115,22,0.4); }
+.pri-btn.active-normal { background: rgba(34,197,94,0.12);  color: #86efac; border-color: rgba(34,197,94,0.3); }
+.pri-btn.active-low    { background: rgba(71,85,105,0.2);   color: #94a3b8; border-color: rgba(71,85,105,0.4); }
+
+.jdm-footer {
+  padding: 14px 22px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface);
+}
+
+.jdm-footer-left { display: flex; gap: 8px; }
+.jdm-footer-right { display: flex; gap: 8px; }
+
+/* activity / history log */
+.activity-log {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.activity-entry {
+  font-size: 11px;
+  color: var(--text2);
+  padding: 5px 8px;
+  background: var(--card2);
+  border-left: 2px solid var(--border2);
+  border-radius: 0 3px 3px 0;
+  line-height: 1.4;
+}
+
+.activity-entry .ae-time { color: var(--muted); font-family: var(--mono); font-size: 10px; }
+.activity-entry .ae-action { color: var(--text); font-weight: 600; }
+
 /* ─── LOADING SPINNER ─── */
 .spinner {
   display: inline-block;
@@ -1237,6 +1484,122 @@ tbody td {
   </div>
 </div>
 
+<!-- ═══════════════════════════════════
+     MODAL: JOB CARD DETAIL / EDIT
+═══════════════════════════════════ -->
+<div class="overlay" id="jobDetailOverlay" onclick="closeOverlay(event,'jobDetailOverlay')">
+  <div class="modal job-detail-modal">
+
+    <div class="jdm-header">
+      <div>
+        <div class="jdm-rego" id="jdm-rego-display">—</div>
+        <div class="jdm-meta" id="jdm-meta-display">—</div>
+      </div>
+      <div class="jdm-header-right">
+        <span style="font-size:11px;color:var(--muted);font-family:var(--mono);" id="jdm-date-display">—</span>
+        <button class="modal-close" onclick="closeModal('jobDetailOverlay')">✕</button>
+      </div>
+    </div>
+
+    <div class="jdm-body">
+
+      <!-- LEFT: JOB INFO -->
+      <div class="jdm-col">
+        <div class="jdm-section-title">Vehicle & Customer</div>
+
+        <div class="jdm-field">
+          <label>NZ Plate / Rego</label>
+          <input class="jdm-inp jdm-inp-mono" type="text" id="jdm-rego" maxlength="8"
+            oninput="this.value=this.value.toUpperCase(); document.getElementById('jdm-rego-display').textContent=this.value||'—'">
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div class="jdm-field">
+            <label>Make / Model</label>
+            <input class="jdm-inp" type="text" id="jdm-vehicle" placeholder="e.g. Toyota Hilux"
+              oninput="updateMetaDisplay()">
+          </div>
+          <div class="jdm-field">
+            <label>Year</label>
+            <input class="jdm-inp" type="text" id="jdm-year" placeholder="e.g. 2019"
+              oninput="updateMetaDisplay()">
+          </div>
+        </div>
+
+        <div class="jdm-field">
+          <label>Customer Name</label>
+          <input class="jdm-inp" type="text" id="jdm-customer" placeholder="Full name"
+            oninput="updateMetaDisplay()">
+        </div>
+
+        <div class="jdm-field">
+          <label>Phone</label>
+          <input class="jdm-inp" type="text" id="jdm-phone" placeholder="021 000 0000">
+        </div>
+
+        <div class="jdm-field">
+          <label>Job Notes</label>
+          <textarea class="jdm-inp" id="jdm-notes" placeholder="Faults, customer requests, special instructions..."></textarea>
+        </div>
+
+        <div class="jdm-section-title">Status & Priority</div>
+
+        <div class="jdm-field">
+          <label>Column</label>
+          <div class="status-select-wrap">
+            <button class="status-btn" data-col="waiting"  onclick="setJobColumn('waiting')">⏳ Waiting</button>
+            <button class="status-btn" data-col="progress" onclick="setJobColumn('progress')">🔧 In Progress</button>
+            <button class="status-btn" data-col="approval" onclick="setJobColumn('approval')">📋 Approval</button>
+            <button class="status-btn" data-col="done"     onclick="setJobColumn('done')">✅ Done</button>
+          </div>
+        </div>
+
+        <div class="jdm-field">
+          <label>Priority</label>
+          <div class="pri-btn-wrap">
+            <button class="pri-btn" data-pri="urgent" onclick="setJobPriority('urgent')">🔴 Urgent</button>
+            <button class="pri-btn" data-pri="high"   onclick="setJobPriority('high')">🟠 High</button>
+            <button class="pri-btn" data-pri="normal" onclick="setJobPriority('normal')">🟢 Normal</button>
+            <button class="pri-btn" data-pri="low"    onclick="setJobPriority('low')">⚪ Low</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: PARTS + ACTIVITY -->
+      <div class="jdm-col">
+        <div class="jdm-section-title">Parts on this Job</div>
+
+        <div class="jdm-parts-area">
+          <div class="jdm-parts-list" id="jdm-parts-list"></div>
+          <div class="jdm-add-part-row">
+            <input class="jdm-inp" type="text" id="jdm-new-part"
+              placeholder="Type part name and press Add..."
+              onkeydown="if(event.key==='Enter')addPartToOpenJob()">
+            <button class="btn btn-blue btn-sm" onclick="addPartToOpenJob()">+ Add</button>
+          </div>
+        </div>
+
+        <div class="jdm-section-title" style="margin-top:4px;">Activity Log</div>
+        <div class="activity-log" id="jdm-activity-log"></div>
+      </div>
+
+    </div>
+
+    <div class="jdm-footer">
+      <div class="jdm-footer-left">
+        <button class="btn btn-ghost btn-sm"
+          style="color:var(--red);border-color:rgba(239,68,68,0.3);"
+          onclick="deleteJobFromDetail()">🗑 Delete Job</button>
+      </div>
+      <div class="jdm-footer-right">
+        <button class="btn btn-ghost btn-sm" onclick="closeModal('jobDetailOverlay')">Cancel</button>
+        <button class="btn btn-accent btn-sm" onclick="saveJobDetail()">Save Changes ✓</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
@@ -1250,6 +1613,10 @@ let jobModalParts = [];
 let currentPart   = null;
 let dragId        = null;
 let editPartId    = null;
+let openJobId     = null;
+let openJobParts  = [];
+let openJobColumn = 'waiting';
+let openJobPri    = 'normal';
 
 // ════════════════════════════════════════════════════════
 // SEED DATA
@@ -1372,7 +1739,6 @@ function renderBoard(search='', pri='') {
 }
 
 function jobCardHTML(j) {
-  // Check which parts have OEM numbers in database
   const partsHTML = j.parts.map(p => {
     const matched = parts.find(db => db.name.toLowerCase() === p.toLowerCase());
     return `<span class="part-chip ${matched?'has-oem':''}" title="${matched?'OEM: '+matched.oem:''}">${p}${matched?' ✓':''}</span>`;
@@ -1382,12 +1748,15 @@ function jobCardHTML(j) {
   <div class="job-card jc-pri-${j.priority}" draggable="true"
        ondragstart="onDragStart(event,'${j.id}')"
        ondragend="onDragEnd()"
-       id="jcard-${j.id}">
+       onclick="openJobDetail('${j.id}')"
+       id="jcard-${j.id}"
+       style="cursor:pointer;">
     <div class="jc-top">
       <div class="rego-plate">${j.rego}</div>
       <div class="jc-actions">
-        <button class="icon-btn" title="Parts lookup" onclick="quickLookup('${j.id}')">🔍</button>
-        <button class="icon-btn" title="Delete" onclick="deleteJob('${j.id}')">🗑</button>
+        <button class="icon-btn" title="Parts lookup" onclick="event.stopPropagation();quickLookup('${j.id}')">🔍</button>
+        <button class="icon-btn" title="Edit" onclick="event.stopPropagation();openJobDetail('${j.id}')">✏️</button>
+        <button class="icon-btn" title="Delete" onclick="event.stopPropagation();deleteJob('${j.id}')">🗑</button>
       </div>
     </div>
     <div class="jc-vehicle">${j.vehicle} ${j.year}</div>
@@ -1425,6 +1794,208 @@ function quickLookup(id) {
       break;
     }
   }
+
+// ════════════════════════════════════════════════════════
+// JOB DETAIL MODAL
+// ════════════════════════════════════════════════════════
+function openJobDetail(id) {
+  const j = jobs.find(x => x.id === id);
+  if (!j) return;
+
+  openJobId     = id;
+  openJobParts  = [...j.parts];
+  openJobColumn = j.column;
+  openJobPri    = j.priority;
+
+  // Populate fields
+  document.getElementById('jdm-rego').value     = j.rego;
+  document.getElementById('jdm-vehicle').value  = j.vehicle;
+  document.getElementById('jdm-year').value     = j.year;
+  document.getElementById('jdm-customer').value = j.customer;
+  document.getElementById('jdm-phone').value    = j.phone;
+  document.getElementById('jdm-notes').value    = j.notes || '';
+
+  // Header display
+  document.getElementById('jdm-rego-display').textContent = j.rego;
+  document.getElementById('jdm-meta-display').textContent = j.vehicle + ' ' + j.year + '  ·  ' + j.customer;
+  document.getElementById('jdm-date-display').textContent = 'Created: ' + j.date;
+
+  // Status buttons
+  refreshStatusBtns(j.column);
+
+  // Priority buttons
+  refreshPriBtns(j.priority);
+
+  // Parts list
+  renderDetailParts();
+
+  // Activity log
+  renderActivityLog(j);
+
+  document.getElementById('jobDetailOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('jdm-rego').focus(), 100);
+}
+
+function updateMetaDisplay() {
+  const rego     = document.getElementById('jdm-rego').value     || '—';
+  const vehicle  = document.getElementById('jdm-vehicle').value  || '';
+  const year     = document.getElementById('jdm-year').value     || '';
+  const customer = document.getElementById('jdm-customer').value || '';
+  document.getElementById('jdm-rego-display').textContent = rego;
+  document.getElementById('jdm-meta-display').textContent =
+    (vehicle + ' ' + year).trim() + (customer ? '  ·  ' + customer : '');
+}
+
+function refreshStatusBtns(col) {
+  openJobColumn = col;
+  document.querySelectorAll('[data-col]').forEach(btn => {
+    btn.className = 'status-btn';
+    if (btn.dataset.col === col) btn.classList.add('active-' + col);
+  });
+}
+
+function refreshPriBtns(pri) {
+  openJobPri = pri;
+  document.querySelectorAll('[data-pri]').forEach(btn => {
+    btn.className = 'pri-btn';
+    if (btn.dataset.pri === pri) btn.classList.add('active-' + pri);
+  });
+}
+
+function setJobColumn(col) { refreshStatusBtns(col); }
+function setJobPriority(pri) { refreshPriBtns(pri); }
+
+function renderDetailParts() {
+  const container = document.getElementById('jdm-parts-list');
+  if (openJobParts.length === 0) {
+    container.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:6px 0;">No parts added yet</div>';
+    return;
+  }
+  container.innerHTML = openJobParts.map((p, i) => {
+    const dbMatch = parts.find(db => db.name.toLowerCase() === p.toLowerCase());
+    return `
+      <div class="jdm-part-row">
+        <span class="jdm-part-name">${p}</span>
+        ${dbMatch
+          ? `<span class="jdm-part-oem" title="OEM number">${dbMatch.oem}</span>`
+          : `<span class="jdm-part-no-oem">No OEM on file</span>`
+        }
+        <div class="jdm-part-actions">
+          ${!dbMatch ? `<button class="icon-btn" title="Look up OEM" onclick="lookupFromDetail('${p.replace(/'/g,"\'")}')">🔍</button>` : ''}
+          <button class="icon-btn" title="Remove part" onclick="removeDetailPart(${i})">×</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function addPartToOpenJob() {
+  const inp = document.getElementById('jdm-new-part');
+  const val = inp.value.trim();
+  if (!val) return;
+  openJobParts.push(val);
+  inp.value = '';
+  renderDetailParts();
+  inp.focus();
+}
+
+function removeDetailPart(i) {
+  const removed = openJobParts[i];
+  openJobParts.splice(i, 1);
+  renderDetailParts();
+  logActivity(openJobId, `Removed part: ${removed}`);
+}
+
+function lookupFromDetail(partName) {
+  closeModal('jobDetailOverlay');
+  showView('lookup');
+  setTimeout(() => {
+    document.getElementById('lu-part').value = partName;
+    searchParts();
+  }, 200);
+}
+
+function renderActivityLog(j) {
+  const log = j.activity || [];
+  const container = document.getElementById('jdm-activity-log');
+  if (log.length === 0) {
+    container.innerHTML = '<div style="font-size:11px;color:var(--muted);padding:4px 8px;">No activity yet — changes are logged when you save.</div>';
+    return;
+  }
+  container.innerHTML = [...log].reverse().map(e =>
+    `<div class="activity-entry">
+      <span class="ae-action">${e.action}</span>
+      <span class="ae-time"> · ${e.time}</span>
+    </div>`
+  ).join('');
+}
+
+function logActivity(id, action) {
+  const j = jobs.find(x => x.id === id);
+  if (!j) return;
+  if (!j.activity) j.activity = [];
+  const now = new Date().toLocaleString('en-NZ', {
+    day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'
+  });
+  j.activity.push({ action, time: now });
+}
+
+function saveJobDetail() {
+  const j = jobs.find(x => x.id === openJobId);
+  if (!j) return;
+
+  const newRego     = document.getElementById('jdm-rego').value.trim().toUpperCase();
+  const newVehicle  = document.getElementById('jdm-vehicle').value.trim();
+  const newYear     = document.getElementById('jdm-year').value.trim();
+  const newCustomer = document.getElementById('jdm-customer').value.trim();
+  const newPhone    = document.getElementById('jdm-phone').value.trim();
+  const newNotes    = document.getElementById('jdm-notes').value.trim();
+
+  if (!newRego)     { alert('Rego is required.'); return; }
+  if (!newCustomer) { alert('Customer name is required.'); return; }
+
+  // Build change log entries
+  const changes = [];
+  if (j.rego     !== newRego)        changes.push(`Rego changed to ${newRego}`);
+  if (j.vehicle  !== newVehicle)     changes.push(`Vehicle updated to ${newVehicle}`);
+  if (j.customer !== newCustomer)    changes.push(`Customer updated to ${newCustomer}`);
+  if (j.column   !== openJobColumn)  changes.push(`Moved to: ${openJobColumn}`);
+  if (j.priority !== openJobPri)     changes.push(`Priority set to: ${openJobPri}`);
+
+  const addedParts   = openJobParts.filter(p => !j.parts.includes(p));
+  const removedParts = j.parts.filter(p => !openJobParts.includes(p));
+  addedParts.forEach(p   => changes.push(`Added part: ${p}`));
+  removedParts.forEach(p => changes.push(`Removed part: ${p}`));
+
+  // Apply changes
+  j.rego     = newRego;
+  j.vehicle  = newVehicle  || 'Unknown';
+  j.year     = newYear     || '—';
+  j.customer = newCustomer;
+  j.phone    = newPhone    || '—';
+  j.notes    = newNotes;
+  j.column   = openJobColumn;
+  j.priority = openJobPri;
+  j.parts    = [...openJobParts];
+
+  // Log all changes
+  changes.forEach(c => logActivity(openJobId, c));
+  if (changes.length === 0) logActivity(openJobId, 'Job card viewed (no changes)');
+
+  saveJobs();
+  renderBoard();
+  closeModal('jobDetailOverlay');
+  toast(`✔ Job ${newRego} saved!`);
+}
+
+function deleteJobFromDetail() {
+  const j = jobs.find(x => x.id === openJobId);
+  if (!j) return;
+  if (!confirm(`Delete job card for ${j.rego} — ${j.customer}? This cannot be undone.`)) return;
+  jobs = jobs.filter(x => x.id !== openJobId);
+  saveJobs();
+  renderBoard();
+  closeModal('jobDetailOverlay');
+  toast('Job card deleted.', 'info');
 }
 
 // ─── DRAG & DROP ───
