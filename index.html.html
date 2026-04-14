@@ -1607,6 +1607,23 @@ textarea.jdm-inp { resize: vertical; min-height: 72px; }
 // ════════════════════════════════════════════════════════
 // STATE
 // ════════════════════════════════════════════════════════
+// If jobs is an empty array in storage (broken previous load), clear it so seed data runs
+(function() {
+  try {
+    const storedJobs = localStorage.getItem('pl_jobs');
+    if (storedJobs !== null && JSON.parse(storedJobs).length === 0) {
+      localStorage.removeItem('pl_jobs');
+    }
+    const storedParts = localStorage.getItem('pl_parts');
+    if (storedParts !== null && JSON.parse(storedParts).length === 0) {
+      localStorage.removeItem('pl_parts');
+    }
+  } catch(e) {
+    localStorage.removeItem('pl_jobs');
+    localStorage.removeItem('pl_parts');
+  }
+})();
+
 let jobs  = JSON.parse(localStorage.getItem('pl_jobs')  || '[]');
 let parts = JSON.parse(localStorage.getItem('pl_parts') || '[]');
 let jobModalParts = [];
@@ -1619,41 +1636,41 @@ let openJobColumn = 'waiting';
 let openJobPri    = 'normal';
 
 // ════════════════════════════════════════════════════════
-// SEED DATA
+// HELPERS  (defined first so seed data can use them)
+// ════════════════════════════════════════════════════════
+function uid() { return '_'+Math.random().toString(36).slice(2,9); }
+function today() { return new Date().toLocaleDateString('en-NZ',{day:'numeric',month:'short',year:'numeric'}); }
+function saveJobs()  { localStorage.setItem('pl_jobs',  JSON.stringify(jobs));  }
+function saveParts() { localStorage.setItem('pl_parts', JSON.stringify(parts)); updateDBCount(); }
+
+// ════════════════════════════════════════════════════════
+// SEED DATA  (only loads if localStorage is empty)
 // ════════════════════════════════════════════════════════
 if (jobs.length === 0) {
   jobs = [
-    { id: uid(), rego:'GHT421', customer:'Mike Tane',     phone:'021 555 1234', vehicle:'Toyota Hilux',    year:'2018', parts:['Front brake pads','Brake fluid'],       notes:'Squealing on left front.', priority:'urgent', column:'progress', date:today() },
-    { id: uid(), rego:'RXZ992', customer:'Sarah Collins', phone:'027 444 8800', vehicle:'Subaru Forester', year:'2016', parts:['Oil filter','Engine oil 5W-30'],         notes:'100,000km service.',       priority:'normal', column:'waiting',  date:today() },
-    { id: uid(), rego:'KBB777', customer:'Dave Ngata',    phone:'021 321 9900', vehicle:'Mazda Atenza',    year:'2020', parts:['Cabin air filter'],                      notes:'A/C smells musty.',        priority:'low',    column:'approval', date:today() },
-    { id: uid(), rego:'FLX203', customer:'Priya Sharma',  phone:'022 111 4455', vehicle:'Honda CR-V',      year:'2017', parts:['CV axle shaft','Wheel bearing'],         notes:'Clicking on hard left.',   priority:'high',   column:'progress', date:today() },
+    { id:uid(), rego:'GHT421', customer:'Mike Tane',     phone:'021 555 1234', vehicle:'Toyota Hilux',    year:'2018', parts:['Front Brake Pads','Brake fluid'],    notes:'Squealing on left front.',   priority:'urgent', column:'progress', date:today(), activity:[] },
+    { id:uid(), rego:'RXZ992', customer:'Sarah Collins', phone:'027 444 8800', vehicle:'Subaru Forester', year:'2016', parts:['Subaru Air Filter','Engine Oil Filter'], notes:'100,000km service.',      priority:'normal', column:'waiting',  date:today(), activity:[] },
+    { id:uid(), rego:'KBB777', customer:'Dave Ngata',    phone:'021 321 9900', vehicle:'Mazda Atenza',    year:'2020', parts:['Cabin Air Filter'],                  notes:'A/C smells musty.',          priority:'low',    column:'approval', date:today(), activity:[] },
+    { id:uid(), rego:'FLX203', customer:'Priya Sharma',  phone:'022 111 4455', vehicle:'Honda CR-V',      year:'2017', parts:['CV Axle Shaft (Left)','Front Wheel Bearing'], notes:'Clicking on hard left turn.', priority:'high', column:'progress', date:today(), activity:[] },
   ];
   saveJobs();
 }
 
 if (parts.length === 0) {
   parts = [
-    { id:uid(), name:'Front Brake Pads',        oem:'04465-0K290',  brand:'Toyota',  category:'Brakes',     makes:['Toyota'],        models:['Hilux','Fortuner'],          yearFrom:'2015', yearTo:'2023', afm:'Bendix: DB1881, Repco: BPF04465',  notes:'Suits GGN/KUN series. Check rotor condition.' },
-    { id:uid(), name:'Rear Brake Pads',         oem:'04466-0K200',  brand:'Toyota',  category:'Brakes',     makes:['Toyota'],        models:['Hilux','4Runner'],           yearFrom:'2015', yearTo:'2023', afm:'Bendix: DB1882',                   notes:'' },
-    { id:uid(), name:'Oil Filter',              oem:'15400-RTA-003',brand:'Honda',   category:'Filters',    makes:['Honda'],         models:['CR-V','Accord','Civic'],     yearFrom:'2012', yearTo:'2022', afm:'Ryco: Z436, Repco: OF436',         notes:'Standard thread. Use with 5W-30.' },
-    { id:uid(), name:'Engine Oil Filter',       oem:'90915-YZZD2',  brand:'Toyota',  category:'Filters',    makes:['Toyota','Lexus'],models:['Hilux','Camry','RAV4'],      yearFrom:'2010', yearTo:'2024', afm:'Ryco: Z386, Baldwin: B7317',       notes:'Common Toyota fitment across many models.' },
-    { id:uid(), name:'Cabin Air Filter',        oem:'87139-33010',  brand:'Toyota',  category:'Filters',    makes:['Toyota','Mazda'],models:['Atenza','Camry','Aurion'],   yearFrom:'2014', yearTo:'2022', afm:'Ryco: RCA261P',                    notes:'Check for charcoal variant if A/C smell present.' },
-    { id:uid(), name:'Front Wheel Bearing',     oem:'44300-T0A-951',brand:'Honda',   category:'Suspension', makes:['Honda'],         models:['CR-V','HR-V'],               yearFrom:'2012', yearTo:'2021', afm:'Timken: 512449, SKF: BR930788',    notes:'Press-fit hub assembly. Align after install.' },
-    { id:uid(), name:'CV Axle Shaft (Left)',    oem:'44306-T0A-951',brand:'Honda',   category:'Suspension', makes:['Honda'],         models:['CR-V'],                      yearFrom:'2012', yearTo:'2021', afm:'GSP: NCV73602',                    notes:'Check boot integrity. Replace both if high km.' },
-    { id:uid(), name:'Air Filter',              oem:'17801-0L040',  brand:'Toyota',  category:'Filters',    makes:['Toyota'],        models:['Hilux','Land Cruiser Prado'],yearFrom:'2015', yearTo:'2023', afm:'Ryco: A1781, Wesfil: WA5160',      notes:'' },
-    { id:uid(), name:'Spark Plug Set (x4)',     oem:'22401-JA01B',  brand:'Nissan',  category:'Engine',     makes:['Nissan'],        models:['Skyline','Altima','Teana'],  yearFrom:'2006', yearTo:'2018', afm:'NGK: DILKAR7A11, Denso: SK20PR-A11',notes:'Iridium type. Gap: 1.1mm.' },
-    { id:uid(), name:'Subaru Air Filter',       oem:'16546-AA090',  brand:'Subaru',  category:'Filters',    makes:['Subaru'],        models:['Forester','Impreza','WRX'],  yearFrom:'2008', yearTo:'2021', afm:'Ryco: A1490, Wesfil: WA5050',      notes:'' },
+    { id:uid(), name:'Front Brake Pads',     oem:'04465-0K290',   brand:'Toyota', category:'Brakes',     makes:['Toyota'],         models:['Hilux','Fortuner'],           yearFrom:'2015', yearTo:'2023', afm:'Bendix: DB1881, Repco: BPF04465',   notes:'Suits GGN/KUN series. Check rotor condition.' },
+    { id:uid(), name:'Rear Brake Pads',      oem:'04466-0K200',   brand:'Toyota', category:'Brakes',     makes:['Toyota'],         models:['Hilux','4Runner'],            yearFrom:'2015', yearTo:'2023', afm:'Bendix: DB1882',                    notes:'' },
+    { id:uid(), name:'Oil Filter',           oem:'15400-RTA-003', brand:'Honda',  category:'Filters',    makes:['Honda'],          models:['CR-V','Accord','Civic'],      yearFrom:'2012', yearTo:'2022', afm:'Ryco: Z436, Repco: OF436',          notes:'Standard thread. Use with 5W-30.' },
+    { id:uid(), name:'Engine Oil Filter',    oem:'90915-YZZD2',   brand:'Toyota', category:'Filters',    makes:['Toyota','Lexus'], models:['Hilux','Camry','RAV4'],       yearFrom:'2010', yearTo:'2024', afm:'Ryco: Z386, Baldwin: B7317',        notes:'Common Toyota fitment across many models.' },
+    { id:uid(), name:'Cabin Air Filter',     oem:'87139-33010',   brand:'Toyota', category:'Filters',    makes:['Toyota','Mazda'], models:['Atenza','Camry','Aurion'],    yearFrom:'2014', yearTo:'2022', afm:'Ryco: RCA261P',                     notes:'Check for charcoal variant if A/C smell present.' },
+    { id:uid(), name:'Front Wheel Bearing',  oem:'44300-T0A-951', brand:'Honda',  category:'Suspension', makes:['Honda'],          models:['CR-V','HR-V'],                yearFrom:'2012', yearTo:'2021', afm:'Timken: 512449, SKF: BR930788',     notes:'Press-fit hub assembly. Align after install.' },
+    { id:uid(), name:'CV Axle Shaft (Left)', oem:'44306-T0A-951', brand:'Honda',  category:'Suspension', makes:['Honda'],          models:['CR-V'],                       yearFrom:'2012', yearTo:'2021', afm:'GSP: NCV73602',                     notes:'Check boot integrity. Replace both if high km.' },
+    { id:uid(), name:'Air Filter',           oem:'17801-0L040',   brand:'Toyota', category:'Filters',    makes:['Toyota'],         models:['Hilux','Land Cruiser Prado'], yearFrom:'2015', yearTo:'2023', afm:'Ryco: A1781, Wesfil: WA5160',       notes:'' },
+    { id:uid(), name:'Spark Plug Set (x4)',  oem:'22401-JA01B',   brand:'Nissan', category:'Engine',     makes:['Nissan'],         models:['Skyline','Altima','Teana'],   yearFrom:'2006', yearTo:'2018', afm:'NGK: DILKAR7A11, Denso: SK20PR-A11',notes:'Iridium type. Gap: 1.1mm.' },
+    { id:uid(), name:'Subaru Air Filter',    oem:'16546-AA090',   brand:'Subaru', category:'Filters',    makes:['Subaru'],         models:['Forester','Impreza','WRX'],   yearFrom:'2008', yearTo:'2021', afm:'Ryco: A1490, Wesfil: WA5050',       notes:'' },
   ];
   saveParts();
 }
-
-// ════════════════════════════════════════════════════════
-// HELPERS
-// ════════════════════════════════════════════════════════
-function uid() { return '_'+Math.random().toString(36).slice(2,9); }
-function today() { return new Date().toLocaleDateString('en-NZ',{day:'numeric',month:'short',year:'numeric'}); }
-function saveJobs()  { localStorage.setItem('pl_jobs',  JSON.stringify(jobs));  }
-function saveParts() { localStorage.setItem('pl_parts', JSON.stringify(parts)); updateDBCount(); }
 
 function toast(msg, type='success') {
   const t = document.getElementById('toast');
