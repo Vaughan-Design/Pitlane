@@ -1,0 +1,1514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PitLane — Automotive Job Cards</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:    #0a0c12; --surf:  #10131d; --card:  #161928; --card2: #1c2030;
+  --b1:    #252c3f; --b2:    #2e3650; --acc:   #f97316; --blue:  #3b82f6;
+  --green: #22c55e; --red:   #ef4444; --yel:   #eab308;
+  --tx:    #e2e8f0; --tx2:   #94a3b8; --muted: #475569;
+  --mono: 'Share Tech Mono', monospace;
+  --head: 'Barlow Condensed', sans-serif;
+  --body: 'Barlow', sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--bg);color:var(--tx);font-family:var(--body);display:flex;flex-direction:column;}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--b2);border-radius:4px;}
+
+/* HEADER */
+header{background:var(--surf);border-bottom:2px solid var(--acc);height:54px;display:flex;align-items:center;padding:0 20px;flex-shrink:0;z-index:50;}
+.logo{font-family:var(--head);font-size:26px;font-weight:900;letter-spacing:3px;text-transform:uppercase;margin-right:28px;color:var(--tx);user-select:none;}
+.logo em{color:var(--acc);font-style:normal;}
+.nav{display:flex;height:100%;}
+.nbtn{font-family:var(--head);font-size:13px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:0 18px;background:transparent;border:none;border-bottom:3px solid transparent;color:var(--muted);cursor:pointer;transition:all .14s;display:flex;align-items:center;gap:7px;}
+.nbtn:hover{color:var(--tx2);}
+.nbtn.on{color:var(--acc);border-bottom-color:var(--acc);background:rgba(249,115,22,.06);}
+.bdg{font-size:11px;background:var(--card);border:1px solid var(--b2);color:var(--tx2);padding:1px 7px;border-radius:99px;}
+.hdr-r{margin-left:auto;display:flex;align-items:center;gap:10px;}
+
+/* BUTTONS */
+.btn{font-family:var(--head);font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:7px 16px;border-radius:4px;border:none;cursor:pointer;transition:all .14s;white-space:nowrap;display:inline-flex;align-items:center;gap:5px;}
+.b-acc{background:var(--acc);color:#fff;} .b-acc:hover{background:#ea6c0a;transform:translateY(-1px);box-shadow:0 4px 14px rgba(249,115,22,.3);}
+.b-blue{background:var(--blue);color:#fff;} .b-blue:hover{background:#2563eb;}
+.b-green{background:var(--green);color:#fff;} .b-green:hover{background:#16a34a;}
+.b-ghost{background:transparent;color:var(--tx2);border:1px solid var(--b2);} .b-ghost:hover{color:var(--tx);border-color:var(--tx2);}
+.b-danger{background:transparent;color:var(--red);border:1px solid rgba(239,68,68,.3);} .b-danger:hover{background:rgba(239,68,68,.1);}
+.b-sm{padding:5px 12px;font-size:11px;} .b-xs{padding:3px 8px;font-size:10px;}
+
+/* INPUTS */
+.inp{background:var(--card2);border:1px solid var(--b2);border-radius:4px;color:var(--tx);font-family:var(--body);font-size:13px;padding:8px 11px;outline:none;transition:border-color .15s;width:100%;}
+.inp:focus{border-color:var(--acc);} .inp::placeholder{color:var(--muted);}
+select.inp{cursor:pointer;} select.inp option{background:var(--card);}
+textarea.inp{resize:vertical;min-height:72px;}
+.inp-mono{font-family:var(--mono);font-size:16px;letter-spacing:3px;text-transform:uppercase;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.fg{display:flex;flex-direction:column;gap:5px;}
+.flbl{font-family:var(--head);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
+
+/* VIEWS */
+.view{display:none;flex:1;overflow:hidden;flex-direction:column;}
+.view.on{display:flex;}
+
+/* ── BOARD ── */
+.bbar{padding:12px 20px 10px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--b1);flex-shrink:0;}
+.bsearch{background:var(--card);border:1px solid var(--b2);border-radius:4px;color:var(--tx);font-family:var(--body);font-size:13px;padding:6px 12px;outline:none;width:220px;transition:border-color .15s;}
+.bsearch:focus{border-color:var(--acc);} .bsearch::placeholder{color:var(--muted);}
+.fsel{background:var(--card);border:1px solid var(--b2);border-radius:4px;color:var(--tx2);font-family:var(--body);font-size:12px;padding:6px 10px;outline:none;cursor:pointer;}
+.fsel option{background:var(--card);}
+.bstats{margin-left:auto;font-size:12px;color:var(--muted);}
+.bscroll{flex:1;overflow-x:auto;overflow-y:hidden;padding:16px 20px 20px;}
+.board{display:flex;gap:16px;height:100%;align-items:flex-start;min-width:max-content;}
+
+/* COLUMNS */
+.col{width:288px;background:var(--surf);border:1px solid var(--b1);border-radius:8px;display:flex;flex-direction:column;height:100%;transition:border-color .15s,background .15s;}
+.col.dt{border-color:var(--acc);background:rgba(249,115,22,.04);}
+.col-hd{padding:11px 13px 9px;border-bottom:1px solid var(--b1);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.col-title{font-family:var(--head);font-size:14px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;display:flex;align-items:center;gap:7px;}
+.pip{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.pw{background:var(--yel);box-shadow:0 0 6px var(--yel);} .pp{background:var(--blue);box-shadow:0 0 6px var(--blue);}
+.pa{background:var(--red);box-shadow:0 0 6px var(--red);}  .pd{background:var(--green);box-shadow:0 0 6px var(--green);}
+.col-cnt{font-family:var(--head);font-size:11px;font-weight:700;color:var(--muted);background:var(--card);border:1px solid var(--b1);padding:2px 8px;border-radius:99px;}
+.col-body{flex:1;overflow-y:auto;padding:9px;display:flex;flex-direction:column;gap:8px;}
+.col-ft{padding:8px 9px;border-top:1px solid var(--b1);flex-shrink:0;}
+.col-add{width:100%;background:transparent;border:1px dashed var(--b2);color:var(--muted);font-family:var(--body);font-size:12px;padding:7px;border-radius:5px;cursor:pointer;transition:all .14s;}
+.col-add:hover{border-color:var(--acc);color:var(--acc);background:rgba(249,115,22,.05);}
+.col-empty{text-align:center;padding:28px 8px;color:var(--muted);font-size:12px;line-height:1.7;}
+
+/* JOB CARDS */
+.jcard{background:var(--card);border:1px solid var(--b1);border-left:3px solid var(--b2);border-radius:6px;padding:11px;cursor:pointer;transition:all .14s;animation:fi .18s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:none;}}
+.jcard:hover{border-color:var(--acc);transform:translateY(-2px);box-shadow:0 5px 18px rgba(0,0,0,.5);}
+.jcard.dragging{opacity:.35;transform:rotate(1.2deg) scale(.96);cursor:grabbing;}
+.jcard[draggable="true"]{cursor:grab;}
+.jcp-urgent{border-left-color:var(--red)!important;} .jcp-high{border-left-color:var(--acc)!important;}
+.jcp-normal{border-left-color:var(--green)!important;} .jcp-low{border-left-color:var(--muted)!important;}
+.jc-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:7px;}
+.jc-rego{font-family:var(--mono);font-size:17px;letter-spacing:2px;color:var(--tx);background:var(--bg);border:1px solid var(--b2);padding:3px 9px;border-radius:3px;}
+.jc-btns{display:flex;gap:3px;}
+.icb{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:2px 5px;border-radius:3px;line-height:1;transition:color .1s;}
+.icb:hover{color:var(--tx);}
+.jc-veh{font-size:11px;color:var(--tx2);margin-bottom:5px;font-weight:500;}
+.jc-cust{font-size:12px;font-weight:600;color:var(--tx);margin-bottom:6px;}
+.jc-parts{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:6px;}
+.pchip{font-size:10px;font-weight:500;background:rgba(59,130,246,.12);color:#93c5fd;border:1px solid rgba(59,130,246,.2);padding:2px 6px;border-radius:3px;}
+.pchip.m{background:rgba(34,197,94,.1);color:#86efac;border-color:rgba(34,197,94,.22);}
+.jc-notes{font-size:11px;color:var(--tx2);line-height:1.5;margin-bottom:5px;}
+.jc-ft{display:flex;align-items:center;justify-content:space-between;padding-top:7px;border-top:1px solid var(--b1);}
+.jc-date{font-size:10px;color:var(--muted);font-family:var(--mono);}
+.ppill{font-family:var(--head);font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;padding:2px 7px;border-radius:3px;}
+.pp-urgent{background:rgba(239,68,68,.15);color:#fca5a5;border:1px solid rgba(239,68,68,.25);}
+.pp-high{background:rgba(249,115,22,.15);color:#fdba74;border:1px solid rgba(249,115,22,.25);}
+.pp-normal{background:rgba(34,197,94,.12);color:#86efac;border:1px solid rgba(34,197,94,.22);}
+.pp-low{background:rgba(71,85,105,.2);color:#94a3b8;border:1px solid rgba(71,85,105,.3);}
+
+/* ── LOOKUP ── */
+.lu-wrap{flex:1;display:flex;overflow:hidden;}
+.lu-left{width:360px;flex-shrink:0;border-right:1px solid var(--b1);display:flex;flex-direction:column;overflow:hidden;}
+.pnl-hd{padding:15px 18px 11px;border-bottom:1px solid var(--b1);flex-shrink:0;}
+.pnl-title{font-family:var(--head);font-size:17px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:2px;}
+.pnl-sub{font-size:12px;color:var(--tx2);}
+.lu-form{padding:14px 18px;display:flex;flex-direction:column;gap:11px;border-bottom:1px solid var(--b1);flex-shrink:0;}
+.vf{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);border-radius:4px;padding:8px 12px;font-size:12px;display:none;}
+.vf.on{display:block;} .vf strong{color:var(--green);font-size:13px;display:block;margin-bottom:2px;} .vf span{color:var(--tx2);}
+.lu-res{flex:1;overflow-y:auto;padding:12px 18px;}
+.res-lbl{font-family:var(--head);font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;}
+.no-res{text-align:center;padding:36px 10px;color:var(--muted);font-size:13px;line-height:1.8;}
+.rcard{background:var(--card2);border:1px solid var(--b1);border-radius:6px;padding:10px 12px;margin-bottom:8px;cursor:pointer;transition:all .14s;}
+.rcard:hover{border-color:var(--blue);background:rgba(59,130,246,.05);}
+.rcard.on{border-color:var(--acc);background:rgba(249,115,22,.06);}
+.rc-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px;}
+.rc-name{font-size:13px;font-weight:600;} .rc-brand{font-size:11px;color:var(--tx2);}
+.rc-oem{font-family:var(--mono);font-size:12px;color:var(--acc);letter-spacing:1px;}
+.rc-tags{display:flex;flex-wrap:wrap;gap:3px;margin-top:5px;}
+.rc-tag{font-size:10px;background:var(--card);border:1px solid var(--b2);color:var(--tx2);padding:1px 6px;border-radius:3px;}
+.rc-src{font-size:10px;color:var(--muted);margin-top:4px;font-family:var(--mono);}
+.lu-right{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.det-panel{flex:1;overflow-y:auto;padding:20px 22px;display:flex;flex-direction:column;gap:18px;}
+.det-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted);text-align:center;gap:8px;}
+.det-empty-icon{font-size:44px;opacity:.25;}
+.det-empty h3{font-family:var(--head);font-size:18px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--tx2);}
+.det-empty p{font-size:12px;max-width:280px;line-height:1.6;}
+.sec-title{font-family:var(--head);font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--acc);padding-bottom:7px;border-bottom:1px solid var(--b1);margin-bottom:11px;}
+.det-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.det-f{background:var(--card2);border:1px solid var(--b1);border-radius:5px;padding:9px 11px;}
+.det-f label{display:block;font-family:var(--head);font-size:10px;letter-spacing:1px;color:var(--muted);margin-bottom:3px;text-transform:uppercase;}
+.det-f .val{font-size:13px;font-weight:600;} .det-f.s2{grid-column:span 2;}
+.oem-big{background:linear-gradient(135deg,rgba(249,115,22,.1),rgba(249,115,22,.03));border:1px solid rgba(249,115,22,.3);border-radius:8px;padding:16px 18px;text-align:center;}
+.oem-big label{font-family:var(--head);font-size:11px;letter-spacing:2px;color:var(--tx2);margin-bottom:7px;display:block;text-transform:uppercase;}
+.oem-num{font-family:var(--mono);font-size:26px;color:var(--acc);letter-spacing:3px;word-break:break-all;}
+.oem-copy{margin-top:9px;font-size:11px;color:var(--muted);cursor:pointer;background:none;border:none;font-family:var(--body);transition:color .1s;}
+.oem-copy:hover{color:var(--tx);}
+.afm-list{display:flex;flex-direction:column;gap:5px;}
+.afm-item{background:var(--card2);border:1px solid var(--b1);border-radius:4px;padding:8px 11px;display:flex;align-items:center;justify-content:space-between;}
+.afm-brand{font-size:12px;font-weight:600;} .afm-num{font-family:var(--mono);font-size:12px;color:var(--blue);letter-spacing:1px;}
+.ajbar{padding:12px 18px;border-top:1px solid var(--b1);background:var(--surf);display:none;align-items:center;gap:10px;flex-shrink:0;}
+.ajbar.on{display:flex;}
+.ajb-name{font-size:12px;color:var(--tx2);} .ajb-oem{font-family:var(--mono);font-size:13px;color:var(--acc);letter-spacing:1px;}
+
+/* ── DATABASE ── */
+.db-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.db-bar{padding:12px 20px;border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.db-tbl{flex:1;overflow:auto;padding:0 20px 20px;}
+.db-empty{text-align:center;padding:50px 20px;color:var(--muted);font-size:13px;line-height:1.8;}
+table{width:100%;border-collapse:collapse;margin-top:14px;font-size:13px;}
+thead th{font-family:var(--head);font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);padding:8px 11px;text-align:left;border-bottom:2px solid var(--b1);white-space:nowrap;}
+tbody tr{border-bottom:1px solid var(--b1);transition:background .1s;cursor:pointer;}
+tbody tr:hover{background:var(--card2);}
+tbody td{padding:9px 11px;vertical-align:middle;}
+.td-oem{font-family:var(--mono);color:var(--acc);letter-spacing:1px;}
+.mpill{font-size:10px;background:var(--card2);border:1px solid var(--b2);color:var(--tx2);padding:1px 6px;border-radius:3px;display:inline-block;margin:1px;}
+
+/* ── MODALS ── */
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(3px);padding:20px;}
+.ov.open{display:flex;}
+.modal{background:var(--surf);border:1px solid var(--b2);border-radius:10px;width:520px;max-width:100%;max-height:90vh;overflow-y:auto;animation:mp .17s ease;}
+.mlg{width:640px;} .mxl{width:720px;}
+@keyframes mp{from{opacity:0;transform:scale(.95) translateY(10px);}to{opacity:1;transform:none;}}
+.m-hd{padding:17px 22px 13px;border-bottom:1px solid var(--b1);display:flex;align-items:center;justify-content:space-between;}
+.m-title{font-family:var(--head);font-size:19px;font-weight:800;letter-spacing:1px;text-transform:uppercase;}
+.m-x{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:2px 6px;border-radius:3px;transition:color .1s;}
+.m-x:hover{color:var(--tx);}
+.m-body{padding:17px 22px;display:flex;flex-direction:column;gap:13px;}
+.m-ft{padding:13px 22px;border-top:1px solid var(--b1);display:flex;justify-content:flex-end;gap:8px;}
+.tags-wrap{display:flex;flex-wrap:wrap;gap:5px;min-height:28px;padding:3px 0;}
+.titem{display:flex;align-items:center;gap:4px;font-size:11px;background:rgba(59,130,246,.12);color:#93c5fd;border:1px solid rgba(59,130,246,.25);padding:2px 8px;border-radius:3px;}
+.trm{background:none;border:none;color:#93c5fd;cursor:pointer;font-size:14px;padding:0;opacity:.6;line-height:1;}
+.trm:hover{opacity:1;}
+.prow{display:flex;gap:7px;} .prow .inp{flex:1;}
+
+/* ── JOB DETAIL MODAL ── */
+.jdm-hd{padding:16px 22px 12px;border-bottom:1px solid var(--b1);display:flex;align-items:flex-start;justify-content:space-between;}
+.jdm-rego{font-family:var(--mono);font-size:28px;letter-spacing:4px;line-height:1;}
+.jdm-meta{font-size:13px;color:var(--tx2);margin-top:4px;}
+.jdm-hd-r{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.jdm-date{font-size:11px;color:var(--muted);font-family:var(--mono);}
+.jdm-body{display:grid;grid-template-columns:1fr 1fr;}
+.jdm-col{padding:16px 20px;display:flex;flex-direction:column;gap:13px;}
+.jdm-col:first-child{border-right:1px solid var(--b1);}
+.slbl{font-family:var(--head);font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--acc);padding-bottom:6px;border-bottom:1px solid var(--b1);}
+.tog-row{display:flex;gap:5px;flex-wrap:wrap;}
+.tbtn{font-family:var(--head);font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:5px 10px;border-radius:4px;border:1px solid var(--b2);background:transparent;color:var(--muted);cursor:pointer;transition:all .12s;flex:1;text-align:center;}
+.tbtn:hover{color:var(--tx);border-color:var(--tx2);}
+.ton-waiting{background:rgba(234,179,8,.15);color:var(--yel);border-color:var(--yel)!important;}
+.ton-progress{background:rgba(59,130,246,.15);color:var(--blue);border-color:var(--blue)!important;}
+.ton-approval{background:rgba(239,68,68,.15);color:var(--red);border-color:var(--red)!important;}
+.ton-done{background:rgba(34,197,94,.15);color:var(--green);border-color:var(--green)!important;}
+.ton-urgent{background:rgba(239,68,68,.15);color:#fca5a5;border-color:rgba(239,68,68,.4)!important;}
+.ton-high{background:rgba(249,115,22,.15);color:#fdba74;border-color:rgba(249,115,22,.4)!important;}
+.ton-normal{background:rgba(34,197,94,.12);color:#86efac;border-color:rgba(34,197,94,.35)!important;}
+.ton-low{background:rgba(71,85,105,.2);color:#94a3b8;border-color:rgba(71,85,105,.4)!important;}
+.dpl-list{display:flex;flex-direction:column;gap:5px;max-height:190px;overflow-y:auto;}
+.dpl-row{display:flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--b1);border-radius:4px;padding:6px 10px;}
+.dpl-name{flex:1;font-size:12px;font-weight:500;}
+.dpl-oem{font-family:var(--mono);font-size:11px;color:var(--acc);letter-spacing:1px;}
+.dpl-nooem{font-size:10px;color:var(--muted);font-style:italic;}
+.dpl-acts{display:flex;gap:3px;flex-shrink:0;}
+.dpl-add{display:flex;gap:6px;} .dpl-add .inp{flex:1;}
+.act-log{display:flex;flex-direction:column;gap:5px;max-height:150px;overflow-y:auto;}
+.act-row{font-size:11px;color:var(--tx2);padding:4px 8px;background:var(--card2);border-left:2px solid var(--b2);border-radius:0 3px 3px 0;line-height:1.4;}
+.act-time{color:var(--muted);font-family:var(--mono);font-size:10px;}
+.jdm-ft{padding:12px 20px;border-top:1px solid var(--b1);background:var(--surf);display:flex;align-items:center;justify-content:space-between;}
+.jdm-ft-r{display:flex;gap:7px;}
+
+
+/* ── DISAMBIGUATION MODAL ── */
+.disambig-grid { display: flex; flex-direction: column; gap: 7px; }
+.disambig-opt {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--card2); border: 1px solid var(--b2);
+  border-radius: 6px; padding: 11px 14px;
+  cursor: pointer; transition: all .14s; text-align: left; width: 100%;
+}
+.disambig-opt:hover { border-color: var(--acc); background: rgba(249,115,22,.07); transform: translateX(3px); }
+.disambig-icon { font-size: 22px; flex-shrink: 0; }
+.disambig-label { font-family: var(--head); font-size: 15px; font-weight: 700; letter-spacing: .5px; color: var(--tx); }
+.disambig-sub { font-size: 11px; color: var(--tx2); margin-top: 2px; }
+.disambig-oem { font-family: var(--mono); font-size: 11px; color: var(--acc); margin-top: 2px; letter-spacing: 1px; }
+.disambig-keep { width: 100%; background: transparent; border: 1px dashed var(--b2); color: var(--muted); font-family: var(--body); font-size: 12px; padding: 8px; border-radius: 5px; cursor: pointer; transition: all .14s; margin-top: 4px; }
+.disambig-keep:hover { border-color: var(--tx2); color: var(--tx2); }
+
+
+/* ── EXTERNAL SEARCH BUTTONS ── */
+.ext-search-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 0 2px;
+}
+.ext-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--head);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  padding: 5px 11px;
+  border-radius: 4px;
+  border: 1px solid var(--b2);
+  background: var(--card2);
+  color: var(--tx2);
+  cursor: pointer;
+  transition: all .14s;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.ext-btn:hover { color: var(--tx); border-color: var(--tx2); background: var(--card); transform: translateY(-1px); }
+.ext-btn-ryco  { border-color: rgba(220,50,50,.35);  color: #fca5a5; }
+.ext-btn-ryco:hover  { border-color: var(--red); background: rgba(220,50,50,.08); color: #fca5a5; }
+.ext-btn-repco { border-color: rgba(249,115,22,.35); color: #fdba74; }
+.ext-btn-repco:hover { border-color: var(--acc); background: rgba(249,115,22,.08); color: #fdba74; }
+.ext-btn-sbox  { border-color: rgba(59,130,246,.35); color: #93c5fd; }
+.ext-btn-sbox:hover  { border-color: var(--blue); background: rgba(59,130,246,.08); color: #93c5fd; }
+.ext-btn-goog  { border-color: rgba(100,200,100,.3); color: #86efac; }
+.ext-btn-goog:hover  { border-color: var(--green); background: rgba(34,197,94,.08); color: #86efac; }
+.ext-icon { font-size: 13px; }
+
+/* inline part-row external lookup */
+.dpl-ext-wrap { display: flex; gap: 3px; }
+
+/* TOAST */
+.toast{position:fixed;bottom:22px;right:22px;font-family:var(--head);font-size:13px;font-weight:700;letter-spacing:.5px;padding:10px 18px;border-radius:6px;z-index:999;transform:translateY(70px);opacity:0;transition:all .22s ease;pointer-events:none;}
+.toast.on{transform:translateY(0);opacity:1;}
+.tok{background:var(--green);color:#fff;} .tinfo{background:var(--blue);color:#fff;} .twarn{background:var(--yel);color:#000;}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid var(--b2);border-top-color:var(--acc);border-radius:50%;animation:sp .7s linear infinite;}
+@keyframes sp{to{transform:rotate(360deg);}}
+.ldrow{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--tx2);padding:14px 0;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Pit<em>Lane</em></div>
+  <nav class="nav">
+    <button class="nbtn on" id="tab-board"    onclick="showView('board')">&#9632; Job Board <span class="bdg" id="bdg-board">0</span></button>
+    <button class="nbtn"    id="tab-lookup"   onclick="showView('lookup')">&#128269; Parts Lookup</button>
+    <button class="nbtn"    id="tab-database" onclick="showView('database')">&#128451; Parts DB <span class="bdg" id="bdg-db">0</span></button>
+  </nav>
+  <div class="hdr-r">
+    <button class="btn b-acc" id="btn-new-job" onclick="openNewJob()">+ New Job</button>
+  </div>
+</header>
+
+<!-- BOARD VIEW -->
+<div class="view on" id="view-board">
+  <div class="bbar">
+    <input class="bsearch" id="bs" type="text" placeholder="Search rego, customer, parts..." oninput="renderBoard()">
+    <select class="fsel" id="pf" onchange="renderBoard()">
+      <option value="">All Priorities</option>
+      <option value="urgent">Urgent</option>
+      <option value="high">High</option>
+      <option value="normal">Normal</option>
+      <option value="low">Low</option>
+    </select>
+    <div class="bstats" id="bstats"></div>
+  </div>
+  <div class="bscroll"><div class="board" id="board"></div></div>
+</div>
+
+<!-- LOOKUP VIEW -->
+<div class="view" id="view-lookup">
+  <div class="lu-wrap">
+    <div class="lu-left">
+      <div class="pnl-hd">
+        <div class="pnl-title">OEM Parts Lookup</div>
+        <div class="pnl-sub">Select vehicle then search part name</div>
+      </div>
+      <div class="lu-form">
+        <div class="row2">
+          <div class="fg"><div class="flbl">Make</div><select class="inp" id="lu-make" onchange="luMakeChange()"><option value="">Select...</option></select></div>
+          <div class="fg"><div class="flbl">Model</div><select class="inp" id="lu-model" disabled onchange="luModelChange()"><option value="">Select...</option></select></div>
+        </div>
+        <div class="row2">
+          <div class="fg"><div class="flbl">Year</div><select class="inp" id="lu-year" disabled><option value="">Select...</option></select></div>
+          <div class="fg"><div class="flbl">Engine (opt)</div><input class="inp" id="lu-engine" type="text" placeholder="e.g. 2.5L 4cyl"></div>
+        </div>
+        <div class="vf" id="vf"><strong id="vf-name">—</strong><span id="vf-detail">Vehicle identified</span></div>
+        <div class="fg"><div class="flbl">Part Description</div><input class="inp" id="lu-part" type="text" placeholder="e.g. front brake pads, oil filter..." onkeydown="if(event.key==='Enter')luSearch()"></div>
+        <button class="btn b-blue" style="width:100%;" onclick="luSearch()">Search Parts Database</button>
+      </div>
+      <div class="lu-res" id="lu-res"><div class="no-res">&#128295; Select a vehicle above and enter a part name to search</div></div>
+    </div>
+    <div class="lu-right">
+      <div class="det-panel" id="det-panel">
+        <div class="det-empty"><div class="det-empty-icon">&#128203;</div><h3>Select a Part</h3><p>Search for a part on the left then click a result to see full OEM details and aftermarket alternatives.</p></div>
+      </div>
+      <div class="ajbar" id="ajbar">
+        <div style="flex:1;"><div class="ajb-name" id="ajb-name">—</div><div class="ajb-oem" id="ajb-oem">—</div></div>
+        <select class="inp" style="width:200px;" id="ajb-sel"><option value="">Add to job card...</option></select>
+        <button class="btn b-green b-sm" onclick="addPartToJob()">Add &#10003;</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DATABASE VIEW -->
+<div class="view" id="view-database">
+  <div class="db-wrap">
+    <div class="db-bar">
+      <input class="bsearch" id="dbs" type="text" placeholder="Search parts, OEM numbers, brands..." oninput="renderDB()">
+      <select class="fsel" id="db-mf" onchange="renderDB()"><option value="">All Makes</option></select>
+      <div style="margin-left:auto;"><button class="btn b-acc b-sm" onclick="openPartModal(null,null)">+ Add OEM Entry</button></div>
+    </div>
+    <div class="db-tbl">
+      <div id="db-empty" class="db-empty" style="display:none;">No parts yet. Click <strong>+ Add OEM Entry</strong> to start building your library.</div>
+      <table id="dbtbl" style="display:none;">
+        <thead><tr><th>Part Name</th><th>OEM Number</th><th>Brand</th><th>Makes</th><th>Category</th><th>Aftermarket</th><th></th></tr></thead>
+        <tbody id="dbtbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: NEW JOB -->
+<div class="ov" id="ov-nj" onclick="ovClick(event,'ov-nj')">
+  <div class="modal mlg">
+    <div class="m-hd"><div class="m-title">New Job Card</div><button class="m-x" onclick="closeOv('ov-nj')">&#10005;</button></div>
+    <div class="m-body">
+      <div class="row2">
+        <div class="fg"><div class="flbl">NZ Plate / Rego *</div><input class="inp inp-mono" id="nj-rego" type="text" placeholder="ABC123" maxlength="8" oninput="this.value=this.value.toUpperCase()"></div>
+        <div class="fg"><div class="flbl">Priority</div><select class="inp" id="nj-pri"><option value="normal">Normal</option><option value="high">High</option><option value="urgent">Urgent</option><option value="low">Low</option></select></div>
+      </div>
+      <div class="row2">
+        <div class="fg"><div class="flbl">Customer Name *</div><input class="inp" id="nj-cust" type="text" placeholder="e.g. James Holden"></div>
+        <div class="fg"><div class="flbl">Phone</div><input class="inp" id="nj-phone" type="text" placeholder="021 000 0000"></div>
+      </div>
+      <div class="row2">
+        <div class="fg"><div class="flbl">Make / Model</div><input class="inp" id="nj-veh" type="text" placeholder="e.g. Toyota Hilux"></div>
+        <div class="fg"><div class="flbl">Year</div><input class="inp" id="nj-yr" type="text" placeholder="e.g. 2019"></div>
+      </div>
+      <div class="fg">
+        <div class="flbl">Parts Requested</div>
+        <div class="prow"><input class="inp" id="nj-pinp" type="text" placeholder="Type a part then click Add..." onkeydown="if(event.key==='Enter')njAddPart()"><button class="btn b-blue b-sm" onclick="njAddPart()">+ Add</button></div>
+        <div class="tags-wrap" id="nj-tags"><span style="font-size:11px;color:var(--muted);">No parts added yet</span></div>
+      </div>
+      <div class="fg"><div class="flbl">Job Notes</div><textarea class="inp" id="nj-notes" rows="3" placeholder="Faults, customer requests, special instructions..."></textarea></div>
+      <div class="fg"><div class="flbl">Add to Column</div><select class="inp" id="nj-col"><option value="waiting">Waiting on Parts</option><option value="progress">In Progress</option><option value="approval">Awaiting Approval</option><option value="done">Complete</option></select></div>
+    </div>
+    <div class="m-ft"><button class="btn b-ghost" onclick="closeOv('ov-nj')">Cancel</button><button class="btn b-acc" onclick="saveNewJob()">Create Job Card</button></div>
+  </div>
+</div>
+
+<!-- MODAL: JOB DETAIL -->
+<div class="ov" id="ov-jd" onclick="ovClick(event,'ov-jd')">
+  <div class="modal mxl">
+    <div class="jdm-hd">
+      <div><div class="jdm-rego" id="jdm-rego-d">—</div><div class="jdm-meta" id="jdm-meta-d">—</div></div>
+      <div class="jdm-hd-r"><span class="jdm-date" id="jdm-date-d">—</span><button class="m-x" onclick="closeOv('ov-jd')">&#10005;</button></div>
+    </div>
+    <div class="jdm-body">
+      <div class="jdm-col">
+        <div class="slbl">Vehicle &amp; Customer</div>
+        <div class="fg"><div class="flbl">NZ Plate / Rego</div><input class="inp inp-mono" id="jdm-rego" type="text" maxlength="8" oninput="this.value=this.value.toUpperCase();document.getElementById('jdm-rego-d').textContent=this.value||'—'"></div>
+        <div class="row2">
+          <div class="fg"><div class="flbl">Make / Model</div><input class="inp" id="jdm-veh"  type="text" oninput="jdmMeta()"></div>
+          <div class="fg"><div class="flbl">Year</div>         <input class="inp" id="jdm-yr"   type="text" oninput="jdmMeta()"></div>
+        </div>
+        <div class="fg"><div class="flbl">Customer Name</div><input class="inp" id="jdm-cust"  type="text" oninput="jdmMeta()"></div>
+        <div class="fg"><div class="flbl">Phone</div>         <input class="inp" id="jdm-phone" type="text"></div>
+        <div class="fg"><div class="flbl">Job Notes</div><textarea class="inp" id="jdm-notes" rows="3"></textarea></div>
+        <div class="slbl">Status &amp; Priority</div>
+        <div class="fg">
+          <div class="flbl">Column</div>
+          <div class="tog-row">
+            <button class="tbtn" data-col="waiting"  onclick="jdmCol('waiting')">&#9203; Waiting</button>
+            <button class="tbtn" data-col="progress" onclick="jdmCol('progress')">&#128295; Progress</button>
+            <button class="tbtn" data-col="approval" onclick="jdmCol('approval')">&#128203; Approval</button>
+            <button class="tbtn" data-col="done"     onclick="jdmCol('done')">&#9989; Done</button>
+          </div>
+        </div>
+        <div class="fg">
+          <div class="flbl">Priority</div>
+          <div class="tog-row">
+            <button class="tbtn" data-pri="urgent" onclick="jdmPri('urgent')">&#128308; Urgent</button>
+            <button class="tbtn" data-pri="high"   onclick="jdmPri('high')">&#128992; High</button>
+            <button class="tbtn" data-pri="normal" onclick="jdmPri('normal')">&#128994; Normal</button>
+            <button class="tbtn" data-pri="low"    onclick="jdmPri('low')">&#9898; Low</button>
+          </div>
+        </div>
+      </div>
+      <div class="jdm-col">
+        <div class="slbl">Parts on this Job</div>
+        <div class="dpl-list" id="jdm-parts"></div>
+        <div class="dpl-add"><input class="inp" id="jdm-pinp" type="text" placeholder="Add a part..." onkeydown="if(event.key==='Enter')jdmAddPart()"><button class="btn b-blue b-sm" onclick="jdmAddPart()">+ Add</button></div>
+        <div class="slbl" style="margin-top:4px;">Activity Log</div>
+        <div class="act-log" id="jdm-log"></div>
+      </div>
+    </div>
+    <div class="jdm-ft">
+      <button class="btn b-danger b-sm" onclick="jdmDelete()">&#128465; Delete Job</button>
+      <div class="jdm-ft-r">
+        <button class="btn b-ghost b-sm" onclick="closeOv('ov-jd')">Cancel</button>
+        <button class="btn b-acc b-sm"   onclick="jdmSave()">Save Changes &#10003;</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: ADD/EDIT PART -->
+<div class="ov" id="ov-part" onclick="ovClick(event,'ov-part')">
+  <div class="modal mlg">
+    <div class="m-hd"><div class="m-title" id="pm-title">Add OEM Part</div><button class="m-x" onclick="closeOv('ov-part')">&#10005;</button></div>
+    <div class="m-body">
+      <div class="row2">
+        <div class="fg"><div class="flbl">Part Name *</div><input class="inp" id="pm-name" type="text" placeholder="e.g. Front Brake Pads"></div>
+        <div class="fg"><div class="flbl">Category</div><select class="inp" id="pm-cat"><option>Brakes</option><option>Engine</option><option>Filters</option><option>Suspension</option><option>Transmission</option><option>Electrical</option><option>Cooling</option><option>Exhaust</option><option>Body</option><option>Other</option></select></div>
+      </div>
+      <div class="row2">
+        <div class="fg"><div class="flbl">OEM Number *</div><input class="inp inp-mono" id="pm-oem" type="text" placeholder="e.g. 04465-0K290"></div>
+        <div class="fg"><div class="flbl">OEM Brand</div><input class="inp" id="pm-brand" type="text" placeholder="e.g. Toyota"></div>
+      </div>
+      <div class="fg"><div class="flbl">Compatible Makes (comma separated)</div><input class="inp" id="pm-makes" type="text" placeholder="e.g. Toyota, Lexus"></div>
+      <div class="fg"><div class="flbl">Compatible Models (comma separated)</div><input class="inp" id="pm-models" type="text" placeholder="e.g. Hilux, Fortuner, 4Runner"></div>
+      <div class="row2">
+        <div class="fg"><div class="flbl">Year From</div><input class="inp" id="pm-yrf" type="text" placeholder="e.g. 2015"></div>
+        <div class="fg"><div class="flbl">Year To</div>  <input class="inp" id="pm-yrt" type="text" placeholder="e.g. 2023"></div>
+      </div>
+      <div class="fg"><div class="flbl">Aftermarket Alternatives (Brand: Number, comma separated)</div><input class="inp" id="pm-afm" type="text" placeholder="e.g. Bendix: DB1234, Ryco: Z386"></div>
+      <div class="fg"><div class="flbl">Notes</div><textarea class="inp" id="pm-notes" rows="2" placeholder="Fitment notes, variants..."></textarea></div>
+      <input type="hidden" id="pm-eid">
+    </div>
+    <div class="m-ft"><button class="btn b-ghost" onclick="closeOv('ov-part')">Cancel</button><button class="btn b-acc" onclick="savePart()">Save Part</button></div>
+  </div>
+</div>
+
+
+<!-- MODAL: DISAMBIGUATION -->
+<div class="ov" id="ov-disambig" onclick="ovClick(event,'ov-disambig')">
+  <div class="modal" style="width:420px;">
+    <div class="m-hd">
+      <div class="m-title">&#10067; Clarify Part</div>
+      <button class="m-x" onclick="closeOv('ov-disambig')">&#10005;</button>
+    </div>
+    <div class="m-body">
+      <div style="font-size:13px;color:var(--tx2);margin-bottom:4px;">
+        &ldquo;<span id="disambig-input" style="color:var(--tx);font-weight:600;"></span>&rdquo;
+        could mean several things. Which do you need?
+      </div>
+      <div class="disambig-grid" id="disambig-opts"></div>
+      <button class="disambig-keep" onclick="disambigKeep()">Keep as typed &mdash; add without changes</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+
+// ── HELPERS ────────────────────────────
+function uid()    { return '_' + Math.random().toString(36).slice(2,9); }
+function today()  { return new Date().toLocaleDateString('en-NZ',{day:'numeric',month:'short',year:'numeric'}); }
+function nowStr() { return new Date().toLocaleString('en-NZ',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}); }
+
+function toast(msg, type) {
+  var t = document.getElementById('toast');
+  t.innerHTML = msg;
+  t.className = 'toast on ' + (type === 'info' ? 'tinfo' : type === 'warn' ? 'twarn' : 'tok');
+  clearTimeout(t._t);
+  t._t = setTimeout(function() { t.classList.remove('on'); }, 2800);
+}
+
+function saveJobs()  { localStorage.setItem('pl2_jobs',  JSON.stringify(S.jobs));  }
+function saveParts() { localStorage.setItem('pl2_parts_v2', JSON.stringify(S.parts)); badges(); }
+
+// ── CLEAN SLATE CHECK ───────────────────
+(function() {
+  try {
+    var j = localStorage.getItem('pl2_jobs');
+    if (j && JSON.parse(j).length === 0) localStorage.removeItem('pl2_jobs');
+    var p = localStorage.getItem('pl2_parts_v2');
+    if (p && JSON.parse(p).length === 0) localStorage.removeItem('pl2_parts_v2');
+  } catch(e) { localStorage.removeItem('pl2_jobs'); localStorage.removeItem('pl2_parts_v2'); }
+})();
+
+// ── STATE ──────────────────────────────
+var S = {
+  jobs:    JSON.parse(localStorage.getItem('pl2_jobs')  || 'null') || [],
+  parts:   JSON.parse(localStorage.getItem('pl2_parts_v2') || 'null') || [],
+  dragId:  null,
+  njParts: [],       // new job modal parts
+  jdId:    null,     // open job detail id
+  jdParts: [],       // job detail parts (live edit)
+  jdCol:   'waiting',
+  jdPri:   'normal',
+  actPart: null,     // selected part in lookup
+  pmEid:   null      // part modal edit id
+};
+
+// ── SEED JOBS ──────────────────────────
+if (!S.jobs.length) {
+  S.jobs = [
+    {id:uid(),rego:'GHT421',customer:'Mike Tane',    phone:'021 555 1234',vehicle:'Toyota Hilux',   year:'2018',parts:['Front Brake Pads','Brake Fluid'],          notes:'Squealing noise on left front.',    priority:'urgent',column:'progress',date:today(),activity:[]},
+    {id:uid(),rego:'RXZ992',customer:'Sarah Collins',phone:'027 444 8800',vehicle:'Subaru Forester',year:'2016',parts:['Subaru Air Filter','Engine Oil Filter'],    notes:'100,000km service due.',           priority:'normal',column:'waiting', date:today(),activity:[]},
+    {id:uid(),rego:'KBB777',customer:'Dave Ngata',   phone:'021 321 9900',vehicle:'Mazda Atenza',   year:'2020',parts:['Cabin Air Filter'],                        notes:'A/C smells musty.',                priority:'low',   column:'approval',date:today(),activity:[]},
+    {id:uid(),rego:'FLX203',customer:'Priya Sharma', phone:'022 111 4455',vehicle:'Honda CR-V',     year:'2017',parts:['CV Axle Shaft (Left)','Front Wheel Bearing'],notes:'Clicking on hard left turn.',      priority:'high',  column:'progress',date:today(),activity:[]}
+  ];
+  saveJobs();
+}
+
+// ── SEED PARTS ─────────────────────────
+if (!S.parts.length) {
+  S.parts = [
+
+    // ── TOYOTA HILUX (KUN/GGN series 2005-2015) ──────────────────────────────
+    {id:uid(),name:'Front Brake Pads',          oem:'04465-0K290',   brand:'Toyota', cat:'Brakes',      makes:['Toyota'],         models:['Hilux','Fortuner'],                   yrf:'2005',yrt:'2015',afm:'Bendix: DB1881, Repco: BPF04465',    notes:'KUN26/GGN25 non-VSC (297mm rotor). Verify caliper type before ordering.'},
+    {id:uid(),name:'Front Brake Pads',          oem:'04465-0K360',   brand:'Toyota', cat:'Brakes',      makes:['Toyota'],         models:['Hilux','Fortuner'],                   yrf:'2015',yrt:'2023',afm:'Bendix: DB2143, Repco: BPF04465K',   notes:'GUN125/GUN126 Revo series 2015 onwards. Suits GGN125/KUN125 also.'},
+    {id:uid(),name:'Rear Brake Pads',           oem:'04466-0K200',   brand:'Toyota', cat:'Brakes',      makes:['Toyota'],         models:['Hilux','4Runner'],                    yrf:'2015',yrt:'2023',afm:'Bendix: DB1882',                     notes:'GUN series rear disc. Older KUN/GGN has rear drums — check before ordering.'},
+    {id:uid(),name:'Front Brake Rotors',        oem:'43512-0K060',   brand:'Toyota', cat:'Brakes',      makes:['Toyota'],         models:['Hilux'],                              yrf:'2005',yrt:'2011',afm:'DBA: DBA2716, RDA: RDA7786',         notes:'KUN26/GGN25 without VSC — 297mm diameter. VSC models use 43512-0K110 (319mm).'},
+    {id:uid(),name:'Front Brake Rotors',        oem:'43512-0K110',   brand:'Toyota', cat:'Brakes',      makes:['Toyota'],         models:['Hilux'],                              yrf:'2011',yrt:'2015',afm:'DBA: DBA2716E, RDA: RDA7786',        notes:'KUN26/GGN25 WITH VSC — 319mm diameter. Do not use on non-VSC models.'},
+    {id:uid(),name:'Engine Oil Filter',         oem:'90915-YZZD2',   brand:'Toyota', cat:'Filters',     makes:['Toyota','Lexus'], models:['Hilux','Camry','RAV4','Kluger'],      yrf:'2010',yrt:'2024',afm:'Ryco: Z386, Baldwin: B7317',         notes:'Common Toyota spin-on filter. Fits most 4-cyl and V6 petrol/diesel engines.'},
+    {id:uid(),name:'Air Filter',                oem:'17801-0L040',   brand:'Toyota', cat:'Filters',     makes:['Toyota'],         models:['Hilux','Land Cruiser Prado'],          yrf:'2015',yrt:'2023',afm:'Ryco: A1781, Wesfil: WA5160',        notes:'GUN/GGN Revo series 2015+. Confirm engine variant before ordering.'},
+    {id:uid(),name:'Air Filter',                oem:'17801-0C060',   brand:'Toyota', cat:'Filters',     makes:['Toyota'],         models:['Hilux','Land Cruiser Prado'],          yrf:'2005',yrt:'2015',afm:'Ryco: A1659, Wesfil: WA1023',        notes:'KUN/GGN series 2005-2015 1KD/2KD diesel.'},
+    {id:uid(),name:'Cabin Air Filter',          oem:'87139-33010',   brand:'Toyota', cat:'Filters',     makes:['Toyota','Mazda'],  models:['Camry','Aurion','Atenza'],            yrf:'2006',yrt:'2022',afm:'Ryco: RCA261P',                      notes:'Check for charcoal variant if A/C smell present.'},
+    {id:uid(),name:'Brake Fluid DOT4',          oem:'08823-80010',   brand:'Toyota', cat:'Brakes',      makes:['Toyota','Lexus'],  models:[],                                     yrf:'2000',yrt:'2025',afm:'Castrol: REACT DOT 4, Penrite: DOT 4', notes:'DOT 4. Replace every 2 years or 40,000km regardless of appearance.'},
+    {id:uid(),name:'Front Wheel Hub Bearing',   oem:'43550-0K020',   brand:'Toyota', cat:'Suspension',  makes:['Toyota'],         models:['Hilux'],                              yrf:'2005',yrt:'2015',afm:'Timken: 512399, SKF: VKBA6930',      notes:'KUN/GGN front hub bearing assembly. 4WD models only.'},
+
+    // ── TOYOTA HILUX (GUN series 2015+) ──────────────────────────────────────
+    {id:uid(),name:'Glow Plug Set (x4)',        oem:'19850-11060',   brand:'Toyota', cat:'Engine',      makes:['Toyota'],         models:['Hilux','Land Cruiser Prado'],          yrf:'2015',yrt:'2024',afm:'NGK: Y-701J, Bosch: 0250202028',     notes:'GUN 1GD/2GD diesel engine. Replace full set. Torque to 13 Nm.'},
+    {id:uid(),name:'Serpentine Belt',           oem:'90916-02688',   brand:'Toyota', cat:'Engine',      makes:['Toyota'],         models:['Hilux'],                              yrf:'2015',yrt:'2023',afm:'Gates: 6PK1788, Dayco: 6PK1788',     notes:'GUN125/GUN126. Check tensioner and idler pulley at same time.'},
+
+    // ── TOYOTA LAND CRUISER PRADO 150 SERIES ─────────────────────────────────
+    {id:uid(),name:'Front Brake Pads',          oem:'04465-60200',   brand:'Toyota', cat:'Brakes',      makes:['Toyota'],         models:['Land Cruiser Prado','FJ Cruiser'],     yrf:'2009',yrt:'2023',afm:'Bendix: DB1879, Repco: BPF04465P',   notes:'150 Series Prado (KDJ150/GRJ150). Verify 4-pot vs 2-pot caliper.'},
+    {id:uid(),name:'Engine Oil Filter',         oem:'90915-10004',   brand:'Toyota', cat:'Filters',     makes:['Toyota'],         models:['Land Cruiser Prado','Land Cruiser'],   yrf:'2009',yrt:'2023',afm:'Ryco: Z9, Baldwin: B7317',           notes:'1GD/2GD/1KD diesel engines in 150/200 series. Cartridge style.'},
+    {id:uid(),name:'Air Filter',                oem:'17801-51020',   brand:'Toyota', cat:'Filters',     makes:['Toyota'],         models:['Land Cruiser Prado'],                  yrf:'2009',yrt:'2023',afm:'Ryco: A1810, Wesfil: WA5282',        notes:'150 Series Prado diesel. Check engine code on filter housing.'},
+    {id:uid(),name:'Cabin Air Filter',          oem:'87139-60040',   brand:'Toyota', cat:'Filters',     makes:['Toyota'],         models:['Land Cruiser Prado'],                  yrf:'2009',yrt:'2023',afm:'Ryco: RCA151P, Wesfil: WACF0100',    notes:'150 Series Prado. Located behind glovebox.'},
+
+    // ── TOYOTA CAMRY / AURION ─────────────────────────────────────────────────
+    {id:uid(),name:'Front Brake Pads',          oem:'04465-33471',   brand:'Toyota', cat:'Brakes',      makes:['Toyota'],         models:['Camry','Aurion'],                     yrf:'2012',yrt:'2021',afm:'Bendix: DB1909, Repco: BPF04465C',   notes:'XV50/ACV50 series. Replace in axle pairs.'},
+    {id:uid(),name:'Engine Oil Filter',         oem:'90915-YZZE2',   brand:'Toyota', cat:'Filters',     makes:['Toyota'],         models:['Camry','Aurion','RAV4'],               yrf:'2012',yrt:'2021',afm:'Ryco: Z516, Wesfil: WZ516',          notes:'2AR-FE / 2GR-FE engines. Confirm via engine code sticker in bay.'},
+
+    // ── NISSAN NAVARA D40 (2005-2015, Spain & Thailand built) ─────────────────
+    {id:uid(),name:'Oil Filter',                oem:'15208-BN30A',   brand:'Nissan', cat:'Filters',     makes:['Nissan'],         models:['Navara D40','Pathfinder'],             yrf:'2006',yrt:'2015',afm:'Ryco: Z632, Baldwin: B7431',         notes:'YD25DDTi 2.5L diesel — Spain-built D40. Thailand-built uses 15208-65F0E.'},
+    {id:uid(),name:'Oil Filter',                oem:'15208-65F0E',   brand:'Nissan', cat:'Filters',     makes:['Nissan'],         models:['Navara D40','Navara NP300','Patrol'],  yrf:'2006',yrt:'2020',afm:'Ryco: Z632, Fram: PH10061',          notes:'VQ40DE petrol V6 and Thailand D40 diesel. Cross-references 15208-9E01A.'},
+    {id:uid(),name:'Air Filter',                oem:'16546-4KV0A',   brand:'Nissan', cat:'Filters',     makes:['Nissan'],         models:['Navara NP300'],                        yrf:'2015',yrt:'2023',afm:'Ryco: A1957, Wesfil: WA5394',        notes:'NP300 D23 2.3L twin-turbo diesel. Also cross-refs 16546-4JA1A.'},
+    {id:uid(),name:'Cabin Air Filter',          oem:'27277-4BA0A',   brand:'Nissan', cat:'Filters',     makes:['Nissan'],         models:['Navara NP300','Pathfinder'],           yrf:'2015',yrt:'2023',afm:'Ryco: RCA182P, Wesfil: WACF0172',    notes:'NP300 cabin filter. Behind glovebox panel.'},
+    {id:uid(),name:'Front Brake Pads',          oem:'D1060-EB325',   brand:'Nissan', cat:'Brakes',      makes:['Nissan'],         models:['Navara D40','Navara NP300'],           yrf:'2005',yrt:'2022',afm:'Bendix: DB1754, Repco: BPF-D1060',   notes:'D40 and NP300 front disc pads. Verify with chassis number.'},
+
+    // ── NISSAN PATROL GU (Y61) ────────────────────────────────────────────────
+    {id:uid(),name:'Oil Filter',                oem:'15208-9E01A',   brand:'Nissan', cat:'Filters',     makes:['Nissan'],         models:['Patrol GU'],                          yrf:'1997',yrt:'2016',afm:'Ryco: Z632, Baldwin: B1597',         notes:'ZD30/TD42/TB48 engines in GU Patrol. Very common filter.'},
+    {id:uid(),name:'Air Filter',                oem:'16546-VC100',   brand:'Nissan', cat:'Filters',     makes:['Nissan'],         models:['Patrol GU'],                          yrf:'1997',yrt:'2016',afm:'Ryco: A1451, Wesfil: WA1010',        notes:'GU Patrol all engines. Replace every 15,000km in dusty NZ conditions.'},
+    {id:uid(),name:'Glow Plug Set (x4)',        oem:'11065-VM00A',   brand:'Nissan', cat:'Engine',      makes:['Nissan'],         models:['Patrol GU','Navara D40'],             yrf:'2000',yrt:'2012',afm:'NGK: Y-730J, Bosch: 0250202020',     notes:'ZD30DDTi diesel. Replace if hard starting or rough idle when cold.'},
+
+    // ── MITSUBISHI TRITON MQ / MR (2015+) ────────────────────────────────────
+    {id:uid(),name:'Oil Filter',                oem:'MD135737',      brand:'Mitsubishi',cat:'Filters',  makes:['Mitsubishi'],     models:['Triton MQ','Triton MR','Pajero Sport'],yrf:'2015',yrt:'2024',afm:'Ryco: Z313, Mann: W610/3, Ryco Spin: Z313', notes:'4N15 2.4L diesel. Also cross-refs MZ690072 and 30A4000100.'},
+    {id:uid(),name:'Air Filter',                oem:'1500A316',      brand:'Mitsubishi',cat:'Filters',  makes:['Mitsubishi'],     models:['Triton MQ','Triton MR','Pajero Sport'],yrf:'2015',yrt:'2024',afm:'Ryco: A1898, Wesfil: WA5282',        notes:'4N15 2.4L diesel engine panel filter.'},
+    {id:uid(),name:'Cabin Air Filter',          oem:'7803A112',      brand:'Mitsubishi',cat:'Filters',  makes:['Mitsubishi'],     models:['Triton MQ','Triton MR','Pajero Sport'],yrf:'2015',yrt:'2024',afm:'Ryco: RCA282P, Wesfil: WACF0198',    notes:'MQ/MR Triton cabin filter. Also suits QE/QF Pajero Sport.'},
+    {id:uid(),name:'Front Brake Pads',          oem:'MZ690016',      brand:'Mitsubishi',cat:'Brakes',   makes:['Mitsubishi'],     models:['Triton MQ','Triton MR'],               yrf:'2015',yrt:'2024',afm:'Bendix: DB2113, Repco: BPF-MZ690',   notes:'MQ/MR front pads. Confirm 2WD vs 4WD variant — different caliper sizes.'},
+    {id:uid(),name:'Spark Plug Set (x4)',       oem:'1822A015',      brand:'Mitsubishi',cat:'Engine',   makes:['Mitsubishi'],     models:['Triton MQ Petrol','Outlander'],         yrf:'2015',yrt:'2022',afm:'NGK: ILZFR6D11, Denso: SK20HR11',    notes:'4B12 2.4L petrol. Iridium type. Gap: 1.1mm. Replace at 100,000km.'},
+
+    // ── FORD RANGER PX / PXII / PXIII (2011+) ────────────────────────────────
+    {id:uid(),name:'Oil Filter',                oem:'1S7G-6714-DA',  brand:'Ford',   cat:'Filters',     makes:['Ford','Mazda'],   models:['Ranger PX','BT-50'],                   yrf:'2011',yrt:'2023',afm:'Ryco: Z632, Wesfil: WZ632, Fram: PH10061', notes:'PX/PX2/PX3 Ranger 3.2 TDCi and 2.2 TDCi. Spin-on type.'},
+    {id:uid(),name:'Air Filter',                oem:'EB3G-9601-AA',  brand:'Ford',   cat:'Filters',     makes:['Ford'],           models:['Ranger PXII','Ranger PXIII'],          yrf:'2015',yrt:'2023',afm:'Ryco: A1957, Wesfil: WA5394',        notes:'Ranger PX2/PX3 3.2 TDCi and 2.0 Bi-Turbo. Confirm engine variant.'},
+    {id:uid(),name:'Cabin Air Filter',          oem:'AB3J-9601-AB',  brand:'Ford',   cat:'Filters',     makes:['Ford'],           models:['Ranger PX','Ranger PXII','Ranger PXIII'],yrf:'2011',yrt:'2023',afm:'Ryco: RCA227P, Wesfil: WACF0172',   notes:'All PX Ranger series cabin filter. Behind glovebox.'},
+    {id:uid(),name:'Front Brake Pads',          oem:'2239601',       brand:'Ford',   cat:'Brakes',      makes:['Ford','Mazda'],   models:['Ranger PX','BT-50'],                   yrf:'2011',yrt:'2023',afm:'Bendix: DB2143, Repco: BPF-22396',   notes:'PX/PX2/PX3 front pads. Also suits Mazda BT-50 UP/UR same era.'},
+
+    // ── HONDA CR-V / HR-V / JAZZ ──────────────────────────────────────────────
+    {id:uid(),name:'Oil Filter',                oem:'15400-RTA-003', brand:'Honda',  cat:'Filters',     makes:['Honda'],          models:['CR-V','Accord','Civic','HR-V'],        yrf:'2012',yrt:'2022',afm:'Ryco: Z436, Repco: OF436',           notes:'Standard Honda spin-on. Use with 5W-30 full synthetic.'},
+    {id:uid(),name:'Front Brake Pads',          oem:'45022-T0A-A00', brand:'Honda',  cat:'Brakes',      makes:['Honda'],          models:['CR-V'],                                yrf:'2012',yrt:'2021',afm:'Bendix: DB1889, Repco: BPF45022',   notes:'RM/RT series CR-V front pads (2.4L AWD). Verify trim level.'},
+    {id:uid(),name:'Front Wheel Bearing',       oem:'44300-T0A-951', brand:'Honda',  cat:'Suspension',  makes:['Honda'],          models:['CR-V','HR-V'],                         yrf:'2012',yrt:'2021',afm:'Timken: 512449, SKF: BR930788',      notes:'Press-fit hub assembly. Torque hub nut to 245 Nm. Align after install.'},
+    {id:uid(),name:'CV Axle Shaft (Left)',      oem:'44306-T0A-951', brand:'Honda',  cat:'Suspension',  makes:['Honda'],          models:['CR-V'],                                yrf:'2012',yrt:'2021',afm:'GSP: NCV73602',                      notes:'Check boot integrity. Consider replacing both sides if high km.'},
+    {id:uid(),name:'Spark Plug Set (x4)',       oem:'12290-5LA-A01', brand:'Honda',  cat:'Engine',      makes:['Honda'],          models:['CR-V','Accord','Civic'],               yrf:'2017',yrt:'2023',afm:'NGK: ILZKBR7B8DG, Denso: SKJ20DR-M11',notes:'1.5L VTEC Turbo engine. Iridium. Replace at 100,000km.'},
+
+    // ── SUBARU FORESTER / IMPREZA / OUTBACK ───────────────────────────────────
+    {id:uid(),name:'Air Filter',                oem:'16546-AA090',   brand:'Subaru', cat:'Filters',     makes:['Subaru'],         models:['Forester','Impreza','WRX'],            yrf:'2008',yrt:'2021',afm:'Ryco: A1490, Wesfil: WA5050',        notes:'EJ/FB series engines. Also suits Legacy/Outback same era.'},
+    {id:uid(),name:'Oil Filter',                oem:'15208-AA100',   brand:'Subaru', cat:'Filters',     makes:['Subaru'],         models:['Forester','Impreza','Outback','WRX'],  yrf:'2010',yrt:'2023',afm:'Ryco: Z411, Baldwin: B7422',         notes:'FB20/FA20 engines. Check cartridge vs spin-on for specific model year.'},
+    {id:uid(),name:'Front Brake Pads',          oem:'26296-FJ030',   brand:'Subaru', cat:'Brakes',      makes:['Subaru'],         models:['Forester','Impreza','Outback'],        yrf:'2013',yrt:'2022',afm:'Bendix: DB2007, Repco: BPF26296',    notes:'SJ/SK Forester / GP/GJ Impreza. Brembo caliper variant exists on WRX.'},
+    {id:uid(),name:'Cabin Air Filter',          oem:'72880-FJ000',   brand:'Subaru', cat:'Filters',     makes:['Subaru'],         models:['Forester','Impreza','Legacy'],         yrf:'2013',yrt:'2022',afm:'Ryco: RCA261P, Wesfil: WACF0100',    notes:'SJ Forester / GP Impreza cabin filter location behind glovebox.'},
+
+    // ── MAZDA CX-5 / MAZDA 3 / BT-50 ─────────────────────────────────────────
+    {id:uid(),name:'Oil Filter',                oem:'PE01-14-302',   brand:'Mazda',  cat:'Filters',     makes:['Mazda'],          models:['CX-5','Mazda 3','Mazda 6','BT-50'],    yrf:'2012',yrt:'2023',afm:'Ryco: Z149, Wesfil: WZ149',          notes:'SKYACTIV-D 2.2L and SKYACTIV-G 2.0/2.5L. Very common Mazda fitment.'},
+    {id:uid(),name:'Air Filter',                oem:'LF50-13-3A0',   brand:'Mazda',  cat:'Filters',     makes:['Mazda'],          models:['CX-5','Mazda 3 BL/BM','Mazda 6'],      yrf:'2009',yrt:'2017',afm:'Ryco: A1616, Wesfil: WA5136',        notes:'SKYACTIV-G 2.0/2.5 L petrol. Check panel location varies by model year.'},
+    {id:uid(),name:'Cabin Air Filter',          oem:'BBM2-61-P11',   brand:'Mazda',  cat:'Filters',     makes:['Mazda'],          models:['CX-5','Mazda 6'],                      yrf:'2012',yrt:'2023',afm:'Ryco: RCA231P, Wesfil: WACF0130',    notes:'KE/KF CX-5 cabin filter. Located under dash on passenger side.'},
+    {id:uid(),name:'Front Brake Pads',          oem:'KE11-33-23ZA',  brand:'Mazda',  cat:'Brakes',      makes:['Mazda'],          models:['CX-5'],                                yrf:'2012',yrt:'2022',afm:'Bendix: DB1929, Repco: BPF-KE1133',  notes:'KE/KF series CX-5 front pads. AWD and FWD use same pad.'},
+
+    // ── HYUNDAI / KIA ─────────────────────────────────────────────────────────
+    {id:uid(),name:'Oil Filter',                oem:'26300-35500',   brand:'Hyundai',cat:'Filters',     makes:['Hyundai','Kia'],  models:['Santa Fe','Tucson','Sorento','Sportage'],yrf:'2012',yrt:'2023',afm:'Ryco: Z798, Wesfil: WZ798',          notes:'R-series 2.2L diesel. Very common Hyundai/Kia cross-platform filter.'},
+    {id:uid(),name:'Air Filter',                oem:'28113-2S300',   brand:'Hyundai',cat:'Filters',     makes:['Hyundai','Kia'],  models:['Tucson','Sportage','i30','Ceed'],       yrf:'2015',yrt:'2022',afm:'Ryco: A1832, Wesfil: WA5280',        notes:'Nu 2.0L and Theta 2.4L petrol engines. Panel filter under plastic cover.'},
+    {id:uid(),name:'Front Brake Pads',          oem:'58101-2VA10',   brand:'Hyundai',cat:'Brakes',      makes:['Hyundai','Kia'],  models:['Santa Fe','Sorento','Tucson'],          yrf:'2012',yrt:'2022',afm:'Bendix: DB2032, Repco: BPF58101',    notes:'DM Santa Fe / UM Santa Fe. Verify DX vs DM series before ordering.'},
+    {id:uid(),name:'Cabin Air Filter',          oem:'97133-2W000',   brand:'Hyundai',cat:'Filters',     makes:['Hyundai','Kia'],  models:['Santa Fe','Sorento'],                  yrf:'2012',yrt:'2022',afm:'Ryco: RCA244P, Wesfil: WACF0176',    notes:'DM/DX Santa Fe and KIA Sorento UM. Behind glovebox.'},
+
+    // ── NISSAN SPARK PLUGS ────────────────────────────────────────────────────
+    {id:uid(),name:'Spark Plug Set (x4)',       oem:'22401-JA01B',   brand:'Nissan', cat:'Engine',      makes:['Nissan'],         models:['Skyline','Altima','Teana','370Z'],     yrf:'2006',yrt:'2018',afm:'NGK: DILKAR7A11, Denso: SK20PR-A11',  notes:'VQ35DE/VQ37VHR V6 — iridium type. Gap: 1.1mm. Replace at 100,000km.'},
+
+    // ── UNIVERSAL / MULTI-FIT ─────────────────────────────────────────────────
+    {id:uid(),name:'Brake Fluid DOT4 Plus',     oem:'08823-80012',   brand:'Toyota', cat:'Brakes',      makes:['Toyota','Lexus'],  models:[],                                     yrf:'2010',yrt:'2025',afm:'Penrite: DOT 4 Plus, Motul: DOT 4 LV', notes:'Higher boiling point DOT4+. Recommended for towing/heavy-duty use.'},
+    {id:uid(),name:'Engine Flush Treatment',    oem:'08826-00080',   brand:'Toyota', cat:'Engine',      makes:['Toyota'],          models:[],                                     yrf:'2000',yrt:'2025',afm:'Nulon: E10, Liqui-Moly: 2678',        notes:'Add to old oil 10 min before drain. Clears sludge and deposits.'}
+
+  ];
+  saveParts();
+}
+
+// ── VIEW NAV ───────────────────────────
+function showView(n) {
+  document.querySelectorAll('.view').forEach(function(v){v.classList.remove('on');});
+  document.querySelectorAll('.nbtn').forEach(function(b){b.classList.remove('on');});
+  document.getElementById('view-'+n).classList.add('on');
+  document.getElementById('tab-'+n).classList.add('on');
+  if (n==='board')    renderBoard();
+  if (n==='database') renderDB();
+  if (n==='lookup')   initLookup();
+}
+
+function badges() {
+  document.getElementById('bdg-board').textContent = S.jobs.length;
+  document.getElementById('bdg-db').textContent    = S.parts.length;
+}
+
+
+// ── SYNONYM / FUZZY MATCH ENGINE ──────
+// Each entry: canonical db name -> array of accepted aliases (all lowercase)
+// When a user types any alias, it matches the canonical part in the database.
+var SYNONYMS = [
+  // BRAKE PADS
+  { match: 'front brake pads',    aliases: ['front pads','front brakes','front brake pad','f/brake pads','front disk pads','front disc pads','front brake shoes'] },
+  { match: 'rear brake pads',     aliases: ['rear pads','rear brakes','rear brake pad','r/brake pads','rear disk pads','rear disc pads','back pads','back brakes','back brake pads'] },
+  // BRAKE ROTORS / DISCS
+  { match: 'front brake rotors',  aliases: ['front rotors','front discs','front disks','front brake discs','front brake disks','front rotor','f/rotors','front disc','front disk'] },
+  { match: 'rear brake rotors',   aliases: ['rear rotors','rear discs','rear disks','rear brake discs','rear brake disks','rear rotor','r/rotors','rear disc','rear disk','back rotors','back discs'] },
+  // FILTERS
+  { match: 'oil filter',          aliases: ['engine oil filter','oil fltr','oil filt','sump filter'] },
+  { match: 'engine oil filter',   aliases: ['oil filter','oil fltr','sump filter','engine filter'] },
+  { match: 'air filter',          aliases: ['engine air filter','air filt','air fltr','intake filter'] },
+  { match: 'cabin air filter',    aliases: ['cabin filter','pollen filter','cabin air','interior filter','ac filter','a/c filter','hvac filter','cabin pollen filter'] },
+  { match: 'subaru air filter',   aliases: ['air filter','subaru engine air filter','engine air filter','air filt'] },
+  // SPARK PLUGS
+  { match: 'spark plug set (x4)', aliases: ['spark plugs','plugs','spark plug','plug set','ignition plugs','spark plug set','sparkplugs','sparks'] },
+  // WHEEL BEARINGS
+  { match: 'front wheel bearing', aliases: ['front bearing','wheel bearing','hub bearing','front hub bearing','f/bearing','front wheel hub','front wheel hub bearing'] },
+  { match: 'rear wheel bearing',  aliases: ['rear bearing','rear hub bearing','r/bearing','rear wheel hub','rear wheel hub bearing'] },
+  // CV / AXLE
+  { match: 'cv axle shaft (left)',  aliases: ['cv shaft','cv axle','left cv','left cv axle','driver cv','driver side cv','cv joint shaft','left driveshaft','cv shaft left'] },
+  { match: 'cv axle shaft (right)', aliases: ['right cv','right cv axle','passenger cv','passenger side cv','cv shaft right','right driveshaft'] },
+  // BRAKE FLUID
+  { match: 'brake fluid',         aliases: ['dot 4','dot4','brk fluid','brake oil','brake flid','hydraulic fluid'] },
+  // TYRES
+  { match: 'front tyre',          aliases: ['front tire','f/tyre','front rubber'] },
+  { match: 'rear tyre',           aliases: ['rear tire','r/tyre','rear rubber'] },
+  // SUSPENSION
+  { match: 'front shock absorber',aliases: ['front shock','front strut','front shocks','front damper','f/shock'] },
+  { match: 'rear shock absorber', aliases: ['rear shock','rear strut','rear shocks','rear damper','r/shock','back shock'] },
+  { match: 'front control arm',   aliases: ['front lower arm','lower control arm','front lca','wishbone','front wishbone','control arm front'] },
+  { match: 'rear control arm',    aliases: ['rear lower arm','rear lca','rear wishbone','control arm rear'] },
+  // BELTS
+  { match: 'timing belt',         aliases: ['cam belt','cambelt','timing chain','timing belt kit'] },
+  { match: 'serpentine belt',     aliases: ['drive belt','fan belt','alternator belt','accessory belt','poly v belt'] },
+  // ENGINE
+  { match: 'engine mount',        aliases: ['motor mount','engine mounting','motor mounting'] },
+  { match: 'thermostat',          aliases: ['engine thermostat','coolant thermostat','thermo'] },
+  { match: 'water pump',          aliases: ['coolant pump','engine water pump','w/pump'] },
+  { match: 'radiator',            aliases: ['engine radiator','rad','coolant radiator'] },
+  // TRANSMISSION
+  { match: 'gearbox oil',         aliases: ['transmission fluid','gearbox fluid','gear oil','trans fluid','auto trans fluid','atf'] },
+  { match: 'clutch kit',          aliases: ['clutch','clutch plate','clutch disc','clutch set','clutch assembly'] }
+];
+
+// Normalise a string for fuzzy comparison — lowercase, trim, collapse spaces
+function norm(s) {
+  return s.toLowerCase().trim().replace(/\s+/g,' ').replace(/[-\/\()\[\]]/g,' ').replace(/\s+/g,' ').trim();
+}
+
+// Find best matching part in S.parts for a given user-typed part string.
+// Returns the matched part object or null.
+// Priority: 1) exact db name match, 2) synonym table match, 3) db name contains input, 4) input contains db name
+function findPartMatch(input) {
+  var q = norm(input);
+
+  // 1. Exact match against db names
+  var exact = S.parts.find(function(d){ return norm(d.name) === q; });
+  if (exact) return exact;
+
+  // 2. Synonym table: does q match any alias, then find that canonical name in db?
+  for (var i=0; i<SYNONYMS.length; i++) {
+    var entry = SYNONYMS[i];
+    // Check if q matches the canonical name
+    if (norm(entry.match) === q) {
+      var found = S.parts.find(function(d){ return norm(d.name) === norm(entry.match); });
+      if (found) return found;
+    }
+    // Check if q matches any alias
+    for (var k=0; k<entry.aliases.length; k++) {
+      if (norm(entry.aliases[k]) === q) {
+        var found2 = S.parts.find(function(d){ return norm(d.name) === norm(entry.match); });
+        if (found2) return found2;
+        // Also try to find any db part whose name matches the canonical
+        break;
+      }
+    }
+  }
+
+  // 3. Synonym table: partial alias match (input is contained within an alias or vice versa)
+  for (var j=0; j<SYNONYMS.length; j++) {
+    var syn = SYNONYMS[j];
+    var allTerms = [norm(syn.match)].concat(syn.aliases.map(norm));
+    var anyMatch = allTerms.some(function(t){ return t === q || t.includes(q) || q.includes(t); });
+    if (anyMatch) {
+      var found3 = S.parts.find(function(d){ return norm(d.name) === norm(syn.match); });
+      if (found3) return found3;
+    }
+  }
+
+  // 4. Soft match: db part name includes the query words or vice versa
+  var words = q.split(' ').filter(function(w){ return w.length > 2; });
+  if (words.length) {
+    var soft = S.parts.find(function(d){
+      var dn = norm(d.name);
+      return words.every(function(w){ return dn.includes(w); });
+    });
+    if (soft) return soft;
+  }
+
+  return null;
+}
+
+// ── BOARD ──────────────────────────────
+var COLS = [
+  {id:'waiting', label:'Waiting on Parts', pip:'pw'},
+  {id:'progress',label:'In Progress',      pip:'pp'},
+  {id:'approval',label:'Awaiting Approval',pip:'pa'},
+  {id:'done',    label:'Complete',          pip:'pd'}
+];
+
+function renderBoard() {
+  var search = (document.getElementById('bs').value||'').toLowerCase();
+  var pri    = document.getElementById('pf').value;
+  var board  = document.getElementById('board');
+  board.innerHTML = '';
+  var total = 0;
+
+  COLS.forEach(function(col) {
+    var rows = S.jobs.filter(function(j){ return j.column===col.id; });
+    if (search) rows = rows.filter(function(j){
+      return j.rego.toLowerCase().includes(search)
+          || j.customer.toLowerCase().includes(search)
+          || j.vehicle.toLowerCase().includes(search)
+          || j.parts.some(function(p){return p.toLowerCase().includes(search);});
+    });
+    if (pri) rows = rows.filter(function(j){return j.priority===pri;});
+    total += rows.length;
+
+    var el = document.createElement('div');
+    el.className = 'col';
+    el.id = 'col-'+col.id;
+    el.setAttribute('ondragover','dov(event)');
+    el.setAttribute('ondrop','drp(event,"'+col.id+'")');
+    el.setAttribute('ondragleave','dlv(event)');
+
+    var cards = rows.length
+      ? rows.map(cardHTML).join('')
+      : '<div class="col-empty">No jobs here<br>Drop a card or click + Add</div>';
+
+    el.innerHTML =
+      '<div class="col-hd"><div class="col-title"><span class="pip '+col.pip+'"></span>'+col.label+'</div><span class="col-cnt">'+rows.length+'</span></div>'+
+      '<div class="col-body" id="cb-'+col.id+'">'+cards+'</div>'+
+      '<div class="col-ft"><button class="col-add" onclick="openNewJob(\''+col.id+'\')">&#xFF0B; Add Job Card</button></div>';
+
+    board.appendChild(el);
+  });
+
+  document.getElementById('bstats').textContent = total+' job'+(total!==1?'s':'')+' shown  ·  '+S.jobs.length+' total';
+  badges();
+}
+
+function cardHTML(j) {
+  var ph = j.parts.map(function(p){
+    var m = findPartMatch(p);
+    return '<span class="pchip'+(m?' m':'')+'"'+(m?' title="OEM: '+m.oem+'"':'')+'>'+p+(m?' &#10003;':'')+'</span>';
+  }).join('');
+  return '<div class="jcard jcp-'+j.priority+'" draggable="true" id="jc-'+j.id+'"'+
+    ' ondragstart="dst(event,\''+j.id+'\')" ondragend="dend()" onclick="openJD(\''+j.id+'\')">' +
+    '<div class="jc-top"><div class="jc-rego">'+j.rego+'</div>'+
+    '<div class="jc-btns">'+
+      '<button class="icb" onclick="event.stopPropagation();qlook(\''+j.id+'\')" title="Parts Lookup">&#128269;</button>'+
+      '<button class="icb" onclick="event.stopPropagation();openJD(\''+j.id+'\')" title="Edit">&#9998;</button>'+
+      '<button class="icb" onclick="event.stopPropagation();delJob(\''+j.id+'\')" title="Delete">&#128465;</button>'+
+    '</div></div>'+
+    '<div class="jc-veh">'+j.vehicle+' '+j.year+'</div>'+
+    '<div class="jc-cust">&#128100; '+j.customer+' &middot; '+j.phone+'</div>'+
+    '<div class="jc-parts">'+ph+'</div>'+
+    (j.notes?'<div class="jc-notes">'+j.notes+'</div>':'')+
+    '<div class="jc-ft"><span class="jc-date">'+j.date+'</span><span class="ppill pp-'+j.priority+'">'+j.priority+'</span></div>'+
+  '</div>';
+}
+
+function delJob(id) {
+  if (!confirm('Delete this job card?')) return;
+  S.jobs = S.jobs.filter(function(j){return j.id!==id;});
+  saveJobs(); renderBoard(); toast('Job deleted.','info');
+}
+
+function qlook(id) {
+  var j = S.jobs.find(function(x){return x.id===id;});
+  if (!j) return;
+  showView('lookup');
+  var mk = document.getElementById('lu-make');
+  var mv = j.vehicle.split(' ')[0];
+  for (var i=0;i<mk.options.length;i++) {
+    if (mk.options[i].value.toLowerCase()===mv.toLowerCase()) { mk.value=mk.options[i].value; luMakeChange(); break; }
+  }
+}
+
+// ── DRAG & DROP ───────────────────────
+function dst(e,id) {
+  S.dragId=id; e.dataTransfer.effectAllowed='move';
+  setTimeout(function(){var el=document.getElementById('jc-'+id);if(el)el.classList.add('dragging');},0);
+}
+function dend()  { document.querySelectorAll('.jcard').forEach(function(c){c.classList.remove('dragging');}); }
+function dov(e)  { e.preventDefault(); e.currentTarget.classList.add('dt'); }
+function dlv(e)  { e.currentTarget.classList.remove('dt'); }
+function drp(e,col) {
+  e.preventDefault();
+  document.querySelectorAll('.col').forEach(function(c){c.classList.remove('dt');});
+  if (!S.dragId) return;
+  var j=S.jobs.find(function(x){return x.id===S.dragId;});
+  if (j&&j.column!==col) { j.column=col; saveJobs(); renderBoard(); toast('Card moved &#10003;'); }
+  S.dragId=null;
+}
+
+
+// ── DISAMBIGUATION TABLE ──────────────
+// When a vague term is typed, show clarification options.
+// Each entry: trigger words (any match) -> array of option objects
+var DISAMBIG = [
+  {
+    triggers: ['pads','brake pads','brakes','disk pads','disc pads'],
+    title: 'Which brake pads?',
+    opts: [
+      { icon:'&#128663;', label:'Front Brake Pads',  sub:'Front axle, disc/caliper type', resolve:'Front Brake Pads' },
+      { icon:'&#128663;', label:'Rear Brake Pads',   sub:'Rear axle, disc/caliper type',  resolve:'Rear Brake Pads' },
+      { icon:'&#128663;', label:'Front & Rear Pads', sub:'Add both front and rear',        resolve:'BOTH:Front Brake Pads:Rear Brake Pads' }
+    ]
+  },
+  {
+    triggers: ['rotors','discs','disks','brake discs','brake disks','brake rotors'],
+    title: 'Which brake rotors?',
+    opts: [
+      { icon:'&#9898;', label:'Front Brake Rotors', sub:'Front axle rotors / discs', resolve:'Front Brake Rotors' },
+      { icon:'&#9898;', label:'Rear Brake Rotors',  sub:'Rear axle rotors / discs',  resolve:'Rear Brake Rotors' },
+      { icon:'&#9898;', label:'Front & Rear Rotors',sub:'Add both sets',              resolve:'BOTH:Front Brake Rotors:Rear Brake Rotors' }
+    ]
+  },
+  {
+    triggers: ['shocks','shock','struts','strut','dampers','damper'],
+    title: 'Which shock absorbers?',
+    opts: [
+      { icon:'&#128309;', label:'Front Shock Absorbers', sub:'Front struts / dampers', resolve:'Front Shock Absorber' },
+      { icon:'&#128309;', label:'Rear Shock Absorbers',  sub:'Rear shocks / dampers',  resolve:'Rear Shock Absorber' },
+      { icon:'&#128309;', label:'All Four Shocks',       sub:'Full set front & rear',  resolve:'BOTH:Front Shock Absorber:Rear Shock Absorber' }
+    ]
+  },
+  {
+    triggers: ['bearing','wheel bearing','hub bearing','bearings'],
+    title: 'Which wheel bearing?',
+    opts: [
+      { icon:'&#9881;', label:'Front Wheel Bearing', sub:'Front hub assembly', resolve:'Front Wheel Bearing' },
+      { icon:'&#9881;', label:'Rear Wheel Bearing',  sub:'Rear hub assembly',  resolve:'Rear Wheel Bearing' }
+    ]
+  },
+  {
+    triggers: ['tyre','tire','rubber','tyres','tires'],
+    title: 'Which tyre(s)?',
+    opts: [
+      { icon:'&#9679;', label:'Front Tyre',   sub:'Front axle', resolve:'Front Tyre' },
+      { icon:'&#9679;', label:'Rear Tyre',    sub:'Rear axle',  resolve:'Rear Tyre' },
+      { icon:'&#9679;', label:'Full Set x4',  sub:'All four corners', resolve:'BOTH:Front Tyre:Rear Tyre' }
+    ]
+  },
+  {
+    triggers: ['cv','cv joint','cv axle','cv shaft','driveshaft'],
+    title: 'Which CV axle shaft?',
+    opts: [
+      { icon:'&#128296;', label:'CV Axle Shaft (Left)',  sub:'Driver side / left', resolve:'CV Axle Shaft (Left)' },
+      { icon:'&#128296;', label:'CV Axle Shaft (Right)', sub:'Passenger side / right', resolve:'CV Axle Shaft (Right)' },
+      { icon:'&#128296;', label:'Both CV Shafts',        sub:'Left and right', resolve:'BOTH:CV Axle Shaft (Left):CV Axle Shaft (Right)' }
+    ]
+  },
+  {
+    triggers: ['control arm','lower arm','wishbone','lca'],
+    title: 'Which control arm?',
+    opts: [
+      { icon:'&#128736;', label:'Front Control Arm', sub:'Front lower arm / wishbone', resolve:'Front Control Arm' },
+      { icon:'&#128736;', label:'Rear Control Arm',  sub:'Rear lower arm / wishbone',  resolve:'Rear Control Arm' }
+    ]
+  },
+  {
+    triggers: ['filter','filters'],
+    title: 'Which filter?',
+    opts: [
+      { icon:'&#127922;', label:'Oil Filter',        sub:'Engine oil / sump filter',     resolve:'Oil Filter' },
+      { icon:'&#127922;', label:'Air Filter',        sub:'Engine intake air filter',     resolve:'Air Filter' },
+      { icon:'&#127922;', label:'Cabin Air Filter',  sub:'Pollen / A/C cabin filter',    resolve:'Cabin Air Filter' },
+      { icon:'&#127922;', label:'Fuel Filter',       sub:'Fuel line / tank filter',      resolve:'Fuel Filter' }
+    ]
+  },
+  {
+    triggers: ['belt','belts'],
+    title: 'Which belt?',
+    opts: [
+      { icon:'&#9135;', label:'Timing Belt',      sub:'Cam belt — engine timing', resolve:'Timing Belt' },
+      { icon:'&#9135;', label:'Serpentine Belt',  sub:'Drive / fan / accessory belt', resolve:'Serpentine Belt' }
+    ]
+  }
+];
+
+// State for disambiguation callback
+var S_disambig = { pending: '', target: null, targetIdx: -1 };
+
+// Check if a typed part string is ambiguous. Returns matching DISAMBIG entry or null.
+function checkAmbig(input) {
+  var q = norm(input);
+  // Only trigger if the query is short/vague — 1 or 2 words, no positional word (front/rear/left/right)
+  var positional = ['front','rear','back','left','right','driver','passenger','f/','r/'];
+  var hasPos = positional.some(function(p){ return q.includes(p); });
+  if (hasPos) return null; // already specific enough
+
+  for (var i = 0; i < DISAMBIG.length; i++) {
+    var entry = DISAMBIG[i];
+    for (var k = 0; k < entry.triggers.length; k++) {
+      if (norm(entry.triggers[k]) === q) return entry;
+    }
+  }
+  return null;
+}
+
+// Open the disambiguation modal
+function openDisambig(input, target, idx) {
+  // target = 'nj' (new job) or 'jd' (job detail)
+  // idx = insertion index (-1 = append)
+  S_disambig.pending  = input;
+  S_disambig.target   = target;
+  S_disambig.targetIdx = idx;
+
+  var entry = checkAmbig(input);
+  document.getElementById('disambig-input').textContent = input;
+
+  var optsEl = document.getElementById('disambig-opts');
+  optsEl.innerHTML = entry.opts.map(function(opt, i) {
+    // Look up OEM for the resolved part name
+    var dbMatch = findPartMatch(opt.resolve.split(':')[1] || opt.resolve);
+    var oemLine = dbMatch ? '<div class="disambig-oem">OEM: ' + dbMatch.oem + '</div>' : '';
+    return '<button class="disambig-opt" onclick="disambigChoose(' + i + ')">' +
+      '<span class="disambig-icon">' + opt.icon + '</span>' +
+      '<div>' +
+        '<div class="disambig-label">' + opt.label + '</div>' +
+        '<div class="disambig-sub">' + opt.sub + '</div>' +
+        oemLine +
+      '</div>' +
+    '</button>';
+  }).join('');
+
+  openOv('ov-disambig');
+}
+
+// User picked an option
+function disambigChoose(optIdx) {
+  var entry   = checkAmbig(S_disambig.pending);
+  var opt     = entry.opts[optIdx];
+  var resolve = opt.resolve;
+  closeOv('ov-disambig');
+
+  // Handle BOTH: prefix (adds two parts)
+  if (resolve.indexOf('BOTH:') === 0) {
+    var pair = resolve.replace('BOTH:', '').split(':');
+    pair.forEach(function(name) { disambigCommit(name); });
+  } else {
+    disambigCommit(resolve);
+  }
+}
+
+// User wants to keep as-typed
+function disambigKeep() {
+  closeOv('ov-disambig');
+  disambigCommit(S_disambig.pending);
+}
+
+// Actually add the resolved part name to the correct list
+function disambigCommit(name) {
+  if (S_disambig.target === 'nj') {
+    S.njParts.push(name);
+    njTags();
+    document.getElementById('nj-pinp').focus();
+  } else if (S_disambig.target === 'jd') {
+    S.jdParts.push(name);
+    jdmParts();
+    document.getElementById('jdm-pinp').focus();
+  }
+}
+
+// ── NEW JOB MODAL ─────────────────────
+function openNewJob(col) {
+  S.njParts=[];
+  document.getElementById('nj-col').value = col||'waiting';
+  document.getElementById('nj-rego').value  ='';
+  document.getElementById('nj-cust').value  ='';
+  document.getElementById('nj-phone').value ='';
+  document.getElementById('nj-veh').value   ='';
+  document.getElementById('nj-yr').value    ='';
+  document.getElementById('nj-notes').value ='';
+  document.getElementById('nj-pri').value   ='normal';
+  document.getElementById('nj-pinp').value  ='';
+  njTags();
+  openOv('ov-nj');
+  setTimeout(function(){document.getElementById('nj-rego').focus();},120);
+}
+
+function njAddPart() {
+  var inp=document.getElementById('nj-pinp'), v=inp.value.trim();
+  if (!v) return;
+  inp.value='';
+  var ambig = checkAmbig(v);
+  if (ambig) { openDisambig(v, 'nj', -1); return; }
+  S.njParts.push(v); njTags(); inp.focus();
+}
+function njRemPart(i) { S.njParts.splice(i,1); njTags(); }
+function njTags() {
+  var w=document.getElementById('nj-tags');
+  if (!S.njParts.length) { w.innerHTML='<span style="font-size:11px;color:var(--muted);">No parts added yet</span>'; return; }
+  w.innerHTML=S.njParts.map(function(p,i){
+    return '<span class="titem">'+p+'<button class="trm" onclick="njRemPart('+i+')">&#215;</button></span>';
+  }).join('');
+}
+
+function saveNewJob() {
+  var rego=document.getElementById('nj-rego').value.trim().toUpperCase();
+  var cust=document.getElementById('nj-cust').value.trim();
+  if (!rego) { alert('Rego is required.'); return; }
+  if (!cust) { alert('Customer name is required.'); return; }
+  S.jobs.push({
+    id:uid(), rego:rego, customer:cust,
+    phone:   document.getElementById('nj-phone').value.trim()||'—',
+    vehicle: document.getElementById('nj-veh').value.trim()||'Unknown',
+    year:    document.getElementById('nj-yr').value.trim()||'—',
+    parts:   S.njParts.slice(),
+    notes:   document.getElementById('nj-notes').value.trim(),
+    priority:document.getElementById('nj-pri').value,
+    column:  document.getElementById('nj-col').value,
+    date:today(), activity:[]
+  });
+  saveJobs(); renderBoard(); closeOv('ov-nj'); toast('&#10004; Job card created!');
+}
+
+// ── JOB DETAIL MODAL ──────────────────
+function openJD(id) {
+  var j=S.jobs.find(function(x){return x.id===id;}); if(!j) return;
+  S.jdId=id; S.jdParts=j.parts.slice(); S.jdCol=j.column; S.jdPri=j.priority;
+  document.getElementById('jdm-rego').value  = j.rego;
+  document.getElementById('jdm-veh').value   = j.vehicle;
+  document.getElementById('jdm-yr').value    = j.year;
+  document.getElementById('jdm-cust').value  = j.customer;
+  document.getElementById('jdm-phone').value = j.phone;
+  document.getElementById('jdm-notes').value = j.notes||'';
+  document.getElementById('jdm-rego-d').textContent = j.rego;
+  document.getElementById('jdm-meta-d').textContent = j.vehicle+' '+j.year+'  ·  '+j.customer;
+  document.getElementById('jdm-date-d').textContent = 'Created: '+j.date;
+  jdmRefCol(j.column); jdmRefPri(j.priority); jdmParts(); jdmLog(j);
+  openOv('ov-jd'); setTimeout(function(){document.getElementById('jdm-rego').focus();},120);
+}
+
+function jdmMeta() {
+  var v=document.getElementById('jdm-veh').value, y=document.getElementById('jdm-yr').value, c=document.getElementById('jdm-cust').value;
+  document.getElementById('jdm-meta-d').textContent=(v+' '+y).trim()+(c?'  ·  '+c:'');
+}
+
+function jdmRefCol(col) {
+  S.jdCol=col;
+  document.querySelectorAll('[data-col]').forEach(function(b){
+    b.className='tbtn'; if(b.dataset.col===col) b.classList.add('ton-'+col);
+  });
+}
+function jdmRefPri(pri) {
+  S.jdPri=pri;
+  document.querySelectorAll('[data-pri]').forEach(function(b){
+    b.className='tbtn'; if(b.dataset.pri===pri) b.classList.add('ton-'+pri);
+  });
+}
+function jdmCol(c) { jdmRefCol(c); }
+function jdmPri(p) { jdmRefPri(p); }
+
+function jdmParts() {
+  var el=document.getElementById('jdm-parts');
+  if (!S.jdParts.length) { el.innerHTML='<div style="font-size:12px;color:var(--muted);padding:5px 0;">No parts added yet</div>'; return; }
+  el.innerHTML=S.jdParts.map(function(p,i){
+    var m=findPartMatch(p);
+    var oemNum = m ? m.oem : '';
+    var oemEl  = m ? '<span class="dpl-oem">'+m.oem+'</span>' : '<span class="dpl-nooem">No OEM on file</span>';
+    var luBtn  = m ? '' : '<button class="icb" title="Internal lookup" onclick="jdmLook('+i+')">&#128269;</button>';
+    var rycoUrl  = encodeURIComponent(oemNum||p);
+    var extBtns = '<a class="ext-btn ext-btn-ryco b-xs" style="padding:2px 7px;font-size:10px;" href="https://rycofilters.com.au/filter-finder/?'+( oemNum ? 'oemPartNumber='+encodeURIComponent(oemNum.replace(/-/g,'')) : 'partSearch='+encodeURIComponent(p)  )+'" target="_blank" title="Search Ryco catalogue" rel="noopener">Ryco</a>';
+    var repcoUrl = 'https://www.repco.co.nz/search?q='+encodeURIComponent(oemNum||p);
+    var repcoBtn = '<a class="ext-btn ext-btn-repco b-xs" style="padding:2px 7px;font-size:10px;" href="'+repcoUrl+'" target="_blank" title="Search Repco NZ" rel="noopener">Repco</a>';
+    return '<div class="dpl-row"><span class="dpl-name">'+p+'</span>'+oemEl+
+      '<div class="dpl-acts" style="display:flex;align-items:center;gap:3px;">'+luBtn+extBtns+repcoBtn+'<button class="icb" onclick="jdmRemPart('+i+')">&#215;</button></div></div>';
+  }).join('');
+}
+
+function jdmAddPart() {
+  var inp=document.getElementById('jdm-pinp'), v=inp.value.trim();
+  if (!v) return;
+  inp.value='';
+  var ambig = checkAmbig(v);
+  if (ambig) { openDisambig(v, 'jd', -1); return; }
+  S.jdParts.push(v); jdmParts(); inp.focus();
+}
+function jdmRemPart(i) { S.jdParts.splice(i,1); jdmParts(); }
+function jdmLook(i) {
+  var pn=S.jdParts[i]; closeOv('ov-jd'); showView('lookup');
+  setTimeout(function(){document.getElementById('lu-part').value=pn; luSearch();},200);
+}
+
+function jdmLog(j) {
+  var log=j.activity||[], el=document.getElementById('jdm-log');
+  if (!log.length) { el.innerHTML='<div style="font-size:11px;color:var(--muted);padding:3px 8px;">No activity yet — saved changes are logged here.</div>'; return; }
+  el.innerHTML=log.slice().reverse().map(function(e){
+    return '<div class="act-row"><strong>'+e.a+'</strong> <span class="act-time">&middot; '+e.t+'</span></div>';
+  }).join('');
+}
+
+function jdmLogChange(id, action) {
+  var j=S.jobs.find(function(x){return x.id===id;}); if(!j) return;
+  if (!j.activity) j.activity=[];
+  j.activity.push({a:action, t:nowStr()});
+}
+
+function jdmSave() {
+  var j=S.jobs.find(function(x){return x.id===S.jdId;}); if(!j) return;
+  var nr=document.getElementById('jdm-rego').value.trim().toUpperCase();
+  var nc=document.getElementById('jdm-cust').value.trim();
+  if (!nr) { alert('Rego is required.'); return; }
+  if (!nc) { alert('Customer name is required.'); return; }
+  var nv=document.getElementById('jdm-veh').value.trim()||'Unknown';
+  var ny=document.getElementById('jdm-yr').value.trim()||'—';
+  var np=document.getElementById('jdm-phone').value.trim()||'—';
+  var nn=document.getElementById('jdm-notes').value.trim();
+  if (j.rego!==nr)        jdmLogChange(S.jdId,'Rego changed to '+nr);
+  if (j.vehicle!==nv)     jdmLogChange(S.jdId,'Vehicle updated to '+nv);
+  if (j.customer!==nc)    jdmLogChange(S.jdId,'Customer updated to '+nc);
+  if (j.column!==S.jdCol) jdmLogChange(S.jdId,'Moved to: '+S.jdCol);
+  if (j.priority!==S.jdPri) jdmLogChange(S.jdId,'Priority set to: '+S.jdPri);
+  S.jdParts.filter(function(p){return !j.parts.includes(p);}).forEach(function(p){jdmLogChange(S.jdId,'Added part: '+p);});
+  j.parts.filter(function(p){return !S.jdParts.includes(p);}).forEach(function(p){jdmLogChange(S.jdId,'Removed part: '+p);});
+  j.rego=nr; j.vehicle=nv; j.year=ny; j.customer=nc; j.phone=np; j.notes=nn;
+  j.column=S.jdCol; j.priority=S.jdPri; j.parts=S.jdParts.slice();
+  saveJobs(); renderBoard(); closeOv('ov-jd'); toast('&#10004; '+nr+' saved!');
+}
+
+function jdmDelete() {
+  var j=S.jobs.find(function(x){return x.id===S.jdId;}); if(!j) return;
+  if (!confirm('Delete job for '+j.rego+' — '+j.customer+'? Cannot be undone.')) return;
+  S.jobs=S.jobs.filter(function(x){return x.id!==S.jdId;});
+  saveJobs(); renderBoard(); closeOv('ov-jd'); toast('Job deleted.','info');
+}
+
+// ── PARTS LOOKUP ──────────────────────
+var MAKES=['Acura','Alfa Romeo','Audi','BMW','BYD','Chevrolet','Chrysler','Daihatsu','Dodge','Fiat','Ford','GMC','Great Wall','Holden','Honda','Hyundai','Infiniti','Isuzu','Jaguar','Jeep','Kia','Land Rover','Lexus','Lincoln','Mazda','Mercedes-Benz','Mitsubishi','Nissan','Porsche','RAM','Renault','Skoda','Subaru','Suzuki','Tesla','Toyota','Volkswagen','Volvo'];
+
+function initLookup() {
+  var el=document.getElementById('lu-make');
+  if (el.options.length>1) return;
+  MAKES.forEach(function(m){var o=document.createElement('option');o.value=m;o.textContent=m;el.appendChild(o);});
+}
+
+function luMakeChange() {
+  var make=document.getElementById('lu-make').value;
+  var mel=document.getElementById('lu-model'), yel=document.getElementById('lu-year');
+  mel.innerHTML='<option value="">Loading...</option>'; mel.disabled=true;
+  yel.innerHTML='<option value="">Select...</option>'; yel.disabled=true;
+  document.getElementById('vf').classList.remove('on');
+  if (!make) { mel.innerHTML='<option value="">Select...</option>'; return; }
+  fetch('https://vpic.nhtsa.dot.gov/api/vehicles/GetModelsForMake/'+encodeURIComponent(make)+'?format=json')
+    .then(function(r){return r.json();})
+    .then(function(d){
+      var ms=d.Results.map(function(r){return r.Model_Name;}).filter(function(v,i,a){return a.indexOf(v)===i;}).sort();
+      mel.innerHTML='<option value="">Select model...</option>';
+      ms.forEach(function(m){var o=document.createElement('option');o.value=m;o.textContent=m;mel.appendChild(o);});
+      mel.disabled=false;
+    })
+    .catch(function(){mel.innerHTML='<option value="">Error — type manually</option>';mel.disabled=false;});
+}
+
+function luModelChange() {
+  var yel=document.getElementById('lu-year');
+  yel.innerHTML='<option value="">Select year...</option>';
+  for (var y=new Date().getFullYear();y>=1980;y--) {var o=document.createElement('option');o.value=y;o.textContent=y;yel.appendChild(o);}
+  yel.disabled=false;
+}
+
+document.getElementById('lu-model').addEventListener('change',function(){luModelChange();luYrChg();});
+document.getElementById('lu-year').addEventListener('change',luYrChg);
+
+function luYrChg() {
+  var mk=document.getElementById('lu-make').value, md=document.getElementById('lu-model').value, yr=document.getElementById('lu-year').value;
+  var vf=document.getElementById('vf');
+  if (mk&&md&&yr) {
+    document.getElementById('vf-name').textContent=yr+' '+mk+' '+md;
+    document.getElementById('vf-detail').textContent='Vehicle identified — enter a part name below';
+    vf.classList.add('on');
+  } else { vf.classList.remove('on'); }
+}
+
+function luSearch() {
+  var mk=document.getElementById('lu-make').value, md=document.getElementById('lu-model').value;
+  var yr=parseInt(document.getElementById('lu-year').value,10)||0;
+  var q=document.getElementById('lu-part').value.trim().toLowerCase();
+  var el=document.getElementById('lu-res');
+  if (!q) { el.innerHTML='<div class="no-res">Enter a part description to search</div>'; return; }
+  el.innerHTML='<div class="ldrow"><div class="spin"></div> Searching...</div>';
+  setTimeout(function(){
+    // Build set of db part names that match the query via synonym table
+    var synMatchNames = {};
+    for (var si=0; si<SYNONYMS.length; si++) {
+      var se = SYNONYMS[si];
+      var allT = [norm(se.match)].concat(se.aliases.map(norm));
+      if (allT.some(function(t){ return t.includes(norm(q)) || norm(q).includes(t) || t===norm(q); })) {
+        synMatchNames[norm(se.match)] = true;
+      }
+    }
+    var res=S.parts.filter(function(p){
+      var textMatch = p.name.toLowerCase().includes(q)
+        || p.cat.toLowerCase().includes(q)
+        || p.notes.toLowerCase().includes(q)
+        || synMatchNames[norm(p.name)];
+      if (!textMatch) return false;
+      if (mk&&!p.makes.some(function(m){return m.toLowerCase()===mk.toLowerCase();})) return false;
+      if (md&&p.models.length&&!p.models.some(function(m){return m.toLowerCase().includes(md.toLowerCase());})) return false;
+      if (yr&&p.yrf&&yr<parseInt(p.yrf,10)) return false;
+      if (yr&&p.yrt&&yr>parseInt(p.yrt,10)) return false;
+      return true;
+    });
+    if (!res.length&&(mk||md)) {
+      res=S.parts.filter(function(p){return p.name.toLowerCase().includes(q)||p.cat.toLowerCase().includes(q);});
+    }
+    if (!res.length) {
+      var mk=document.getElementById('lu-make').value;
+      var md=document.getElementById('lu-model').value;
+      var yrv=document.getElementById('lu-year').value;
+      el.innerHTML='<div class="no-res">&#128269; No results for &ldquo;'+q+'&rdquo;<br>'+
+        '<span style="font-size:11px;">Try different keywords or add this part to your database</span><br><br>'+
+        '<button class="btn b-acc b-sm" onclick="openPartModal(\''+q+'\',null)">+ Add to Database</button>'+
+        '</div>'+
+        '<div style="margin-top:12px;"><div class="results-lbl">Search externally for &ldquo;'+q+'&rdquo;</div>'+
+        extSearchBar(q,'',mk,md,yrv)+'</div>';
+      return;
+    }
+    var html='<div class="res-lbl"><span>'+res.length+' result'+(res.length!==1?'s':'')+'</span></div>';
+    html+=res.map(function(p){
+      var tags=p.makes.map(function(m){return '<span class="rc-tag">'+m+'</span>';}).join('');
+      if (p.yrf) tags+='<span class="rc-tag">'+p.yrf+'&ndash;'+(p.yrt||'now')+'</span>';
+      return '<div class="rcard" id="rc-'+p.id+'" onclick="luDet(\''+p.id+'\')">'+
+        '<div class="rc-top"><div><div class="rc-name">'+p.name+'</div><div class="rc-brand">'+p.brand+' &middot; '+p.cat+'</div></div><div class="rc-oem">'+p.oem+'</div></div>'+
+        '<div class="rc-tags">'+tags+'</div><div class="rc-src">Local database &middot; click for details</div></div>';
+    }).join('');
+    el.innerHTML=html;
+  },280);
+}
+
+function luDet(id) {
+  var p=S.parts.find(function(x){return x.id===id;}); if(!p) return;
+  S.actPart=p;
+  document.querySelectorAll('.rcard').forEach(function(c){c.classList.remove('on');});
+  var rc=document.getElementById('rc-'+id); if(rc) rc.classList.add('on');
+
+  var afm='<div style="font-size:12px;color:var(--muted);">No aftermarket alternatives recorded</div>';
+  if (p.afm) afm=p.afm.split(',').map(function(a){
+    var x=a.split(':'); return '<div class="afm-item"><div class="afm-brand">'+(x[0]||'').trim()+'</div><div class="afm-num">'+(x[1]||'').trim()+'</div></div>';
+  }).join('');
+
+  var nr=p.notes?'<div class="det-f s2"><label>Notes</label><div class="val" style="font-size:12px;">'+p.notes+'</div></div>':'';
+
+  document.getElementById('det-panel').innerHTML=
+    '<div><div class="sec-title">OEM Number</div>'+
+      '<div class="oem-big"><label>OEM Part Number</label><div class="oem-num">'+p.oem+'</div>'+
+      '<button class="oem-copy" onclick="cpOEM(\''+p.oem+'\')">&#128203; Copy to clipboard</button></div></div>'+
+    '<div><div class="sec-title">Part Details</div><div class="det-grid">'+
+      '<div class="det-f"><label>Part Name</label><div class="val">'+p.name+'</div></div>'+
+      '<div class="det-f"><label>Category</label><div class="val">'+p.cat+'</div></div>'+
+      '<div class="det-f"><label>OEM Brand</label><div class="val">'+p.brand+'</div></div>'+
+      '<div class="det-f"><label>Year Range</label><div class="val">'+(p.yrf||'—')+'&ndash;'+(p.yrt||'Current')+'</div></div>'+
+      '<div class="det-f s2"><label>Compatible Makes</label><div class="val">'+(p.makes.join(', ')||'—')+'</div></div>'+
+      '<div class="det-f s2"><label>Compatible Models</label><div class="val">'+(p.models.join(', ')||'—')+'</div></div>'+
+      nr+'</div></div>'+
+    '<div><div class="sec-title">Aftermarket Alternatives</div><div class="afm-list">'+afm+'</div></div>'+
+    '<div><div class="sec-title">Actions</div><div style="display:flex;gap:8px;flex-wrap:wrap;">'+
+      '<button class="btn b-ghost b-sm" onclick="openPartModal(null,\''+p.id+'\')">&#9998; Edit</button>'+
+      '<button class="btn b-danger b-sm" onclick="delPart(\''+p.id+'\')">&#128465; Delete</button>'+
+    '</div></div>'+
+    '<div><div class="sec-title">Search External Catalogues</div>'+
+      '<div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Opens in a new tab. Use OEM number or part name to search supplier catalogues directly.</div>'+
+      extSearchBar(p.name, p.oem, p.makes[0]||'', p.models[0]||'', p.yrf||'')+
+    '</div>';
+
+  document.getElementById('ajb-name').textContent=p.name;
+  document.getElementById('ajb-oem').textContent=p.oem;
+  var sel=document.getElementById('ajb-sel');
+  sel.innerHTML='<option value="">Add to job card...</option>';
+  S.jobs.filter(function(j){return j.column!=='done';}).forEach(function(j){
+    var o=document.createElement('option'); o.value=j.id; o.textContent=j.rego+' — '+j.customer; sel.appendChild(o);
+  });
+  document.getElementById('ajbar').classList.add('on');
+}
+
+function cpOEM(oem) { navigator.clipboard.writeText(oem).then(function(){toast('OEM copied!','info');}); }
+
+function addPartToJob() {
+  var jid=document.getElementById('ajb-sel').value;
+  if (!jid||!S.actPart) { toast('Select a job card first','warn'); return; }
+  var j=S.jobs.find(function(x){return x.id===jid;}); if(!j) return;
+  if (j.parts.includes(S.actPart.name)) { toast('Part already on that job card','warn'); return; }
+  j.parts.push(S.actPart.name); saveJobs(); toast('&#10004; Added to '+j.rego);
+}
+
+// ── PARTS DATABASE ────────────────────
+function renderDB() {
+  var q=(document.getElementById('dbs').value||'').toLowerCase();
+  var mf=document.getElementById('db-mf').value;
+  var allM=[];
+  S.parts.forEach(function(p){p.makes.forEach(function(m){if(!allM.includes(m))allM.push(m);});});
+  allM.sort();
+  var mfEl=document.getElementById('db-mf');
+  mfEl.innerHTML='<option value="">All Makes</option>';
+  allM.forEach(function(m){var o=document.createElement('option');o.value=m;o.textContent=m;mfEl.appendChild(o);});
+  if (mf) mfEl.value=mf;
+
+  var rows=S.parts.filter(function(p){
+    if (q&&!p.name.toLowerCase().includes(q)&&!p.oem.toLowerCase().includes(q)&&!p.brand.toLowerCase().includes(q)&&!p.cat.toLowerCase().includes(q)) return false;
+    if (mf&&!p.makes.includes(mf)) return false;
+    return true;
+  });
+
+  var emp=document.getElementById('db-empty'), tbl=document.getElementById('dbtbl'), tb=document.getElementById('dbtbody');
+  if (!rows.length) { emp.style.display='block'; tbl.style.display='none'; return; }
+  emp.style.display='none'; tbl.style.display='';
+
+  tb.innerHTML=rows.map(function(p){
+    var mp=p.makes.map(function(m){return '<span class="mpill">'+m+'</span>';}).join('');
+    var af=p.afm?p.afm.split(',')[0].trim():'—';
+    return '<tr onclick="showView(\'lookup\');setTimeout(function(){luDet(\''+p.id+'\');},150)">'+
+      '<td><strong>'+p.name+'</strong></td><td class="td-oem">'+p.oem+'</td><td>'+p.brand+'</td>'+
+      '<td>'+mp+'</td><td style="font-size:11px;color:var(--tx2);">'+p.cat+'</td>'+
+      '<td style="font-size:11px;color:var(--tx2);">'+af+'</td>'+
+      '<td onclick="event.stopPropagation()" style="white-space:nowrap;">'+
+        '<button class="btn b-ghost b-xs" onclick="openPartModal(null,\''+p.id+'\')">&#9998;</button> '+
+        '<button class="btn b-danger b-xs" onclick="delPart(\''+p.id+'\')">&#128465;</button>'+
+      '</td></tr>';
+  }).join('');
+  badges();
+}
+
+// ── PART MODAL ────────────────────────
+function openPartModal(prefill, eid) {
+  S.pmEid=eid||null;
+  document.getElementById('pm-eid').value=eid||'';
+  if (eid) {
+    var p=S.parts.find(function(x){return x.id===eid;}); if(!p) return;
+    document.getElementById('pm-title').textContent='Edit Part Entry';
+    document.getElementById('pm-name').value  =p.name;
+    document.getElementById('pm-oem').value   =p.oem;
+    document.getElementById('pm-brand').value =p.brand;
+    document.getElementById('pm-cat').value   =p.cat;
+    document.getElementById('pm-makes').value =p.makes.join(', ');
+    document.getElementById('pm-models').value=p.models.join(', ');
+    document.getElementById('pm-yrf').value   =p.yrf||'';
+    document.getElementById('pm-yrt').value   =p.yrt||'';
+    document.getElementById('pm-afm').value   =p.afm||'';
+    document.getElementById('pm-notes').value =p.notes||'';
+  } else {
+    document.getElementById('pm-title').textContent='Add OEM Part Entry';
+    ['pm-name','pm-oem','pm-brand','pm-makes','pm-models','pm-yrf','pm-yrt','pm-afm','pm-notes'].forEach(function(id){document.getElementById(id).value='';});
+    document.getElementById('pm-cat').value='Brakes';
+    if (prefill) document.getElementById('pm-name').value=prefill;
+  }
+  openOv('ov-part'); setTimeout(function(){document.getElementById('pm-name').focus();},120);
+}
+
+function savePart() {
+  var name=document.getElementById('pm-name').value.trim(), oem=document.getElementById('pm-oem').value.trim();
+  if (!name){alert('Part name is required.');return;}
+  if (!oem) {alert('OEM number is required.');return;}
+  var entry={
+    id:S.pmEid||uid(), name:name, oem:oem.toUpperCase(),
+    brand:  document.getElementById('pm-brand').value.trim(),
+    cat:    document.getElementById('pm-cat').value,
+    makes:  document.getElementById('pm-makes').value.split(',').map(function(s){return s.trim();}).filter(Boolean),
+    models: document.getElementById('pm-models').value.split(',').map(function(s){return s.trim();}).filter(Boolean),
+    yrf:    document.getElementById('pm-yrf').value.trim(),
+    yrt:    document.getElementById('pm-yrt').value.trim(),
+    afm:    document.getElementById('pm-afm').value.trim(),
+    notes:  document.getElementById('pm-notes').value.trim()
+  };
+  if (S.pmEid) {
+    var i=S.parts.findIndex(function(p){return p.id===S.pmEid;});
+    if (i>=0) S.parts[i]=entry;
+    toast('Part updated &#10003;');
+  } else {
+    S.parts.push(entry); toast('Part added &#10003;');
+  }
+  saveParts();
+  if (document.getElementById('view-database').classList.contains('on')) renderDB();
+  closeOv('ov-part');
+}
+
+function delPart(id) {
+  if (!confirm('Remove this part from the database?')) return;
+  S.parts=S.parts.filter(function(p){return p.id!==id;});
+  saveParts(); renderDB();
+  document.getElementById('det-panel').innerHTML='<div class="det-empty"><div class="det-empty-icon">&#128203;</div><h3>Select a Part</h3><p>Search for a part on the left.</p></div>';
+  document.getElementById('ajbar').classList.remove('on');
+  toast('Part removed.','info');
+}
+
+// ── OVERLAY HELPERS ───────────────────
+function openOv(id)  { document.getElementById(id).classList.add('open'); }
+function closeOv(id) { document.getElementById(id).classList.remove('open'); }
+function ovClick(e,id){ if(e.target.id===id) closeOv(id); }
+
+
+// ── EXTERNAL SEARCH HELPERS ──────────────
+// Build deep-link URLs for external catalogues
+function extSearchUrls(partName, oem, make, model, year) {
+  var pEnc  = encodeURIComponent(partName || '');
+  var oemEnc= encodeURIComponent((oem || '').replace(/-/g,''));
+  var vEnc  = encodeURIComponent(((make||'')+' '+(model||'')+' '+(year||'')).trim());
+  var combo = encodeURIComponent(((make||'')+' '+(model||'')+' '+(year||'')+' '+(partName||'')).trim());
+
+  return {
+    ryco:   oem
+              ? 'https://rycofilters.com.au/filter-finder/?oemPartNumber=' + oemEnc
+              : 'https://rycofilters.com.au/filter-finder/?partSearch=' + pEnc,
+    repco:  'https://www.repco.co.nz/search?q=' + encodeURIComponent((oem||partName||'').trim()),
+    sbox:   'https://www.sparesbox.com.au/search?q=' + encodeURIComponent((oem||partName||'').trim()),
+    goog:   'https://www.google.com/search?q=' + encodeURIComponent('NZ '+((make||'')+' '+(model||'')+' '+(year||'')+' '+(oem||partName||'')).trim()+' OEM part number')
+  };
+}
+
+// Render the external search bar HTML for a given part context
+function extSearchBar(partName, oem, make, model, year) {
+  var urls = extSearchUrls(partName, oem, make, model, year);
+  return '<div class="ext-search-bar">'
+    + '<a class="ext-btn ext-btn-ryco"  href="'+urls.ryco+'"  target="_blank" rel="noopener"><span class="ext-icon">&#128269;</span> Ryco Catalogue</a>'
+    + '<a class="ext-btn ext-btn-repco" href="'+urls.repco+'" target="_blank" rel="noopener"><span class="ext-icon">&#128269;</span> Repco NZ</a>'
+    + '<a class="ext-btn ext-btn-sbox"  href="'+urls.sbox+'"  target="_blank" rel="noopener"><span class="ext-icon">&#128269;</span> Sparesbox</a>'
+    + '<a class="ext-btn ext-btn-goog"  href="'+urls.goog+'"  target="_blank" rel="noopener"><span class="ext-icon">&#128269;</span> Google OEM</a>'
+    + '</div>';
+}
+
+// Quick external search from a part row in job detail (part name only, no vehicle context)
+function extSearchPart(partName, oem) {
+  var urls = extSearchUrls(partName, oem, '', '', '');
+  // Open a small chooser toast — or just open Ryco directly as primary
+  window.open(urls.ryco, '_blank');
+}
+
+// ── INIT ──────────────────────────────
+renderBoard();
+badges();
+</script>
+</body>
+</html>
