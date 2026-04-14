@@ -1,0 +1,2550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PitLane — Job Card & Parts Lookup</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:        #0a0c12;
+  --surface:   #10131d;
+  --card:      #161928;
+  --card2:     #1c2030;
+  --border:    #252c3f;
+  --border2:   #2e3650;
+  --accent:    #f97316;
+  --accent-dim:#7a3a0c;
+  --blue:      #3b82f6;
+  --blue-dim:  #1e3a5f;
+  --green:     #22c55e;
+  --green-dim: #14532d;
+  --red:       #ef4444;
+  --yellow:    #eab308;
+  --text:      #e2e8f0;
+  --text2:     #94a3b8;
+  --muted:     #475569;
+  --mono:      'Share Tech Mono', monospace;
+  --head:      'Barlow Condensed', sans-serif;
+  --body:      'Barlow', sans-serif;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow:hidden;}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--body);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+
+/* ─── HEADER ─── */
+header {
+  background: var(--surface);
+  border-bottom: 2px solid var(--accent);
+  height: 54px;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 0;
+  flex-shrink: 0;
+  z-index: 50;
+}
+
+.logo {
+  font-family: var(--head);
+  font-size: 26px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  color: var(--text);
+  text-transform: uppercase;
+  margin-right: 32px;
+}
+.logo em { color: var(--accent); font-style: normal; }
+
+.nav-tabs {
+  display: flex;
+  height: 100%;
+  gap: 2px;
+}
+
+.nav-tab {
+  font-family: var(--head);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 0 20px;
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.nav-tab:hover { color: var(--text2); }
+.nav-tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  background: rgba(249,115,22,0.06);
+}
+
+.nav-tab .tab-count {
+  font-size: 11px;
+  background: var(--card);
+  border: 1px solid var(--border2);
+  padding: 1px 7px;
+  border-radius: 99px;
+  color: var(--text2);
+}
+
+.header-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ─── BUTTONS ─── */
+.btn {
+  font-family: var(--head);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 7px 16px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.btn-accent { background: var(--accent); color: #fff; }
+.btn-accent:hover { background: #ea6c0a; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(249,115,22,0.3); }
+.btn-blue { background: var(--blue); color: #fff; }
+.btn-blue:hover { background: #2563eb; }
+.btn-green { background: var(--green); color: #fff; }
+.btn-green:hover { background: #16a34a; }
+.btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border2); }
+.btn-ghost:hover { color: var(--text); border-color: var(--text2); }
+.btn-sm { padding: 5px 12px; font-size: 12px; }
+.btn-icon { padding: 6px 10px; }
+
+/* ─── VIEWS ─── */
+.view { display: none; flex: 1; overflow: hidden; }
+.view.active { display: flex; flex-direction: column; }
+
+/* ════════════════════════════════════
+   BOARD VIEW
+════════════════════════════════════ */
+.board-toolbar {
+  padding: 14px 20px 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.board-search {
+  background: var(--card);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  color: var(--text);
+  font-family: var(--body);
+  font-size: 13px;
+  padding: 6px 12px;
+  outline: none;
+  width: 220px;
+  transition: border-color 0.15s;
+}
+.board-search:focus { border-color: var(--accent); }
+.board-search::placeholder { color: var(--muted); }
+
+.filter-select {
+  background: var(--card);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  color: var(--text2);
+  font-family: var(--body);
+  font-size: 12px;
+  padding: 6px 10px;
+  outline: none;
+  cursor: pointer;
+}
+.filter-select option { background: var(--card); }
+
+.board-wrap {
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 16px 20px 20px;
+}
+
+.board {
+  display: flex;
+  gap: 16px;
+  height: 100%;
+  align-items: flex-start;
+  min-width: max-content;
+}
+
+/* ─── COLUMNS ─── */
+.column {
+  width: 290px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  transition: border-color 0.15s;
+}
+.column.drag-over { border-color: var(--accent) !important; background: rgba(249,115,22,0.04) !important; }
+
+.col-header {
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.col-title {
+  font-family: var(--head);
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.col-pip {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.pip-waiting  { background: var(--yellow); box-shadow: 0 0 6px var(--yellow); }
+.pip-progress { background: var(--blue);   box-shadow: 0 0 6px var(--blue); }
+.pip-approval { background: var(--red);    box-shadow: 0 0 6px var(--red); }
+.pip-done     { background: var(--green);  box-shadow: 0 0 6px var(--green); }
+
+.col-count {
+  font-family: var(--head);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  background: var(--card);
+  padding: 2px 8px;
+  border-radius: 99px;
+  border: 1px solid var(--border);
+}
+
+.col-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.col-foot {
+  padding: 8px 10px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.add-btn {
+  width: 100%;
+  background: transparent;
+  border: 1px dashed var(--border2);
+  color: var(--muted);
+  font-family: var(--body);
+  font-size: 12px;
+  padding: 7px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+}
+.add-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(249,115,22,0.05); }
+
+/* ─── JOB CARDS ─── */
+.job-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 11px;
+  cursor: grab;
+  transition: all 0.15s;
+  position: relative;
+  border-left: 3px solid var(--border2);
+  animation: cardIn 0.2s ease;
+}
+@keyframes cardIn {
+  from { opacity:0; transform: translateY(6px); }
+  to   { opacity:1; transform: none; }
+}
+.job-card:hover { border-color: var(--accent); transform: translateY(-1px); box-shadow: 0 5px 18px rgba(0,0,0,0.5); }
+.job-card.dragging { opacity: 0.35; transform: rotate(1deg) scale(0.96); cursor: grabbing; }
+
+.jc-pri-urgent   { border-left-color: var(--red) !important; }
+.jc-pri-high     { border-left-color: var(--accent) !important; }
+.jc-pri-normal   { border-left-color: var(--green) !important; }
+.jc-pri-low      { border-left-color: var(--muted) !important; }
+
+.jc-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 7px; }
+
+.rego-plate {
+  font-family: var(--mono);
+  font-size: 17px;
+  font-weight: 400;
+  letter-spacing: 2px;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  padding: 3px 9px;
+  border-radius: 3px;
+  line-height: 1.35;
+}
+
+.jc-actions { display: flex; gap: 4px; }
+.icon-btn {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px 5px;
+  border-radius: 3px;
+  transition: color 0.1s;
+  line-height: 1;
+}
+.icon-btn:hover { color: var(--text); }
+
+.jc-vehicle { font-size: 11px; color: var(--text2); margin-bottom: 5px; font-weight: 500; }
+.jc-customer { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+
+.jc-parts { display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 7px; }
+
+.part-chip {
+  font-size: 10px;
+  font-weight: 500;
+  background: rgba(59,130,246,0.12);
+  color: #93c5fd;
+  border: 1px solid rgba(59,130,246,0.22);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+.part-chip.has-oem {
+  background: rgba(34,197,94,0.1);
+  color: #86efac;
+  border-color: rgba(34,197,94,0.22);
+}
+
+.jc-foot { display: flex; align-items: center; justify-content: space-between; padding-top: 7px; border-top: 1px solid var(--border); }
+.jc-date { font-size: 10px; color: var(--muted); font-family: var(--mono); }
+
+.pri-pill {
+  font-family: var(--head);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 3px;
+}
+.pri-urgent { background: rgba(239,68,68,0.15);  color: #fca5a5; border: 1px solid rgba(239,68,68,0.25); }
+.pri-high   { background: rgba(249,115,22,0.15); color: #fdba74; border: 1px solid rgba(249,115,22,0.25); }
+.pri-normal { background: rgba(34,197,94,0.12);  color: #86efac; border: 1px solid rgba(34,197,94,0.22); }
+.pri-low    { background: rgba(71,85,105,0.2);   color: #94a3b8; border: 1px solid rgba(71,85,105,0.3); }
+
+.empty-state {
+  text-align: center;
+  padding: 28px 10px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+/* ════════════════════════════════════
+   PARTS LOOKUP VIEW
+════════════════════════════════════ */
+.lookup-view {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* LEFT PANEL */
+.lookup-left {
+  width: 380px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.panel-head {
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.panel-title {
+  font-family: var(--head);
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+.panel-sub { font-size: 12px; color: var(--text2); }
+
+.lookup-form {
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+}
+
+/* ─── STEP INDICATORS ─── */
+.steps {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 4px;
+}
+.step {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--head);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.step.active { color: var(--accent); }
+.step.done { color: var(--green); }
+.step-num {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+.step-line {
+  flex: 1;
+  height: 1px;
+  background: var(--border2);
+  margin: 0 6px;
+}
+
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+
+label {
+  font-family: var(--head);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.inp {
+  background: var(--card2);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  color: var(--text);
+  font-family: var(--body);
+  font-size: 13px;
+  padding: 8px 11px;
+  outline: none;
+  transition: border-color 0.15s;
+  width: 100%;
+}
+.inp:focus { border-color: var(--accent); }
+.inp::placeholder { color: var(--muted); }
+.inp-mono { font-family: var(--mono); font-size: 15px; letter-spacing: 2px; text-transform: uppercase; }
+
+select.inp { cursor: pointer; }
+select.inp option { background: var(--card); }
+
+.inp-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+.vehicle-found {
+  background: rgba(34,197,94,0.08);
+  border: 1px solid rgba(34,197,94,0.25);
+  border-radius: 4px;
+  padding: 9px 12px;
+  font-size: 12px;
+  display: none;
+}
+.vehicle-found.show { display: block; }
+.vehicle-found strong { color: var(--green); font-size: 13px; display: block; margin-bottom: 3px; }
+.vehicle-found span { color: var(--text2); }
+
+.vehicle-error {
+  background: rgba(239,68,68,0.08);
+  border: 1px solid rgba(239,68,68,0.2);
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: #fca5a5;
+  display: none;
+}
+.vehicle-error.show { display: block; }
+
+/* PARTS SEARCH */
+.part-search-wrap {
+  position: relative;
+}
+.part-search-wrap .inp { padding-right: 80px; }
+.search-shortcut {
+  position: absolute;
+  right: 8px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 10px;
+  color: var(--muted);
+  font-family: var(--mono);
+  background: var(--card);
+  border: 1px solid var(--border2);
+  padding: 2px 5px;
+  border-radius: 3px;
+}
+
+/* RESULTS PANEL */
+.lookup-results {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 18px;
+}
+
+.results-label {
+  font-family: var(--head);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.result-card {
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 11px 13px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.result-card:hover { border-color: var(--blue); background: rgba(59,130,246,0.05); }
+.result-card.selected { border-color: var(--accent); background: rgba(249,115,22,0.06); }
+
+.rc-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 5px; }
+.rc-name { font-size: 13px; font-weight: 600; color: var(--text); }
+.rc-brand { font-size: 11px; color: var(--text2); font-weight: 500; }
+.rc-oem {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--accent);
+  letter-spacing: 1px;
+}
+.rc-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.rc-tag {
+  font-size: 10px;
+  background: var(--card);
+  border: 1px solid var(--border2);
+  color: var(--text2);
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+.rc-source { font-size: 10px; color: var(--muted); margin-top: 5px; font-family: var(--mono); }
+
+.no-results {
+  text-align: center;
+  padding: 30px 10px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+/* RIGHT PANEL */
+.lookup-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.detail-panel {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.detail-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  gap: 10px;
+  text-align: center;
+}
+.detail-empty-icon { font-size: 48px; opacity: 0.3; }
+.detail-empty h3 { font-family: var(--head); font-size: 20px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text2); }
+.detail-empty p { font-size: 13px; max-width: 300px; line-height: 1.6; }
+
+.section-title {
+  font-family: var(--head);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--accent);
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 12px;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.detail-field {
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 10px 12px;
+}
+.detail-field label { display: block; font-size: 10px; color: var(--muted); margin-bottom: 4px; font-family: var(--head); letter-spacing: 1px; }
+.detail-field .val { font-size: 14px; font-weight: 600; color: var(--text); }
+.detail-field .val-mono { font-family: var(--mono); font-size: 15px; color: var(--accent); letter-spacing: 1.5px; }
+.detail-field.span2 { grid-column: span 2; }
+
+.oem-big {
+  background: linear-gradient(135deg, rgba(249,115,22,0.1), rgba(249,115,22,0.03));
+  border: 1px solid rgba(249,115,22,0.3);
+  border-radius: 8px;
+  padding: 18px 20px;
+  text-align: center;
+}
+.oem-big label { font-family: var(--head); font-size: 12px; letter-spacing: 2px; color: var(--text2); margin-bottom: 8px; display: block; }
+.oem-big .oem-number {
+  font-family: var(--mono);
+  font-size: 28px;
+  color: var(--accent);
+  letter-spacing: 3px;
+  word-break: break-all;
+}
+.oem-big .oem-copy {
+  margin-top: 10px;
+  font-size: 11px;
+  color: var(--muted);
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: var(--body);
+  transition: color 0.1s;
+}
+.oem-big .oem-copy:hover { color: var(--text); }
+
+.afm-list { display: flex; flex-direction: column; gap: 6px; }
+.afm-item {
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 9px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.afm-brand { font-size: 13px; font-weight: 600; }
+.afm-num { font-family: var(--mono); font-size: 13px; color: var(--blue); letter-spacing: 1px; }
+.afm-note { font-size: 11px; color: var(--text2); }
+
+.add-to-job-bar {
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* ════════════════════════════════════
+   PARTS DATABASE VIEW
+════════════════════════════════════ */
+.db-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.db-toolbar {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.db-table-wrap {
+  flex: 1;
+  overflow: auto;
+  padding: 0 20px 20px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 14px;
+  font-size: 13px;
+}
+thead th {
+  font-family: var(--head);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 8px 12px;
+  text-align: left;
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+}
+tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background 0.1s;
+  cursor: pointer;
+}
+tbody tr:hover { background: var(--card2); }
+tbody td {
+  padding: 10px 12px;
+  vertical-align: middle;
+}
+.td-oem { font-family: var(--mono); color: var(--accent); letter-spacing: 1px; }
+.td-makes { display: flex; flex-wrap: wrap; gap: 3px; }
+.make-pill {
+  font-size: 10px;
+  background: var(--card2);
+  border: 1px solid var(--border2);
+  color: var(--text2);
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+.td-actions { display: flex; gap: 5px; }
+
+/* ════════════════════════════════════
+   MODALS
+════════════════════════════════════ */
+.overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.8);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(3px);
+  padding: 20px;
+}
+.overlay.open { display: flex; }
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  width: 540px;
+  max-width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: modalPop 0.18s ease;
+}
+.modal-lg { width: 620px; }
+
+@keyframes modalPop {
+  from { opacity:0; transform: scale(0.95) translateY(10px); }
+  to   { opacity:1; transform: none; }
+}
+
+.modal-head {
+  padding: 18px 22px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.modal-title {
+  font-family: var(--head);
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.modal-close {
+  background: none; border: none;
+  color: var(--muted); font-size: 20px;
+  cursor: pointer; padding: 2px 6px;
+  border-radius: 3px; transition: color 0.1s;
+}
+.modal-close:hover { color: var(--text); }
+
+.modal-body {
+  padding: 18px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.modal-foot {
+  padding: 14px 22px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* parts tags in modal */
+.parts-row { display: flex; gap: 8px; }
+.parts-row .inp { flex: 1; }
+.tags-wrap {
+  display: flex; flex-wrap: wrap;
+  gap: 5px;
+  min-height: 30px;
+  padding: 4px 0;
+}
+.tag-item {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 11px;
+  background: rgba(59,130,246,0.12);
+  color: #93c5fd;
+  border: 1px solid rgba(59,130,246,0.25);
+  padding: 3px 8px;
+  border-radius: 3px;
+}
+.tag-rm {
+  background: none; border: none;
+  color: #93c5fd; cursor: pointer;
+  font-size: 13px; padding: 0; opacity: 0.6;
+}
+.tag-rm:hover { opacity: 1; }
+
+/* ─── TOAST ─── */
+.toast {
+  position: fixed;
+  bottom: 22px; right: 22px;
+  font-family: var(--head);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 11px 18px;
+  border-radius: 6px;
+  z-index: 999;
+  transform: translateY(70px);
+  opacity: 0;
+  transition: all 0.22s ease;
+  pointer-events: none;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast-success { background: var(--green); color: #fff; }
+.toast-info    { background: var(--blue); color: #fff; }
+.toast-warn    { background: var(--yellow); color: #000; }
+
+/* ════════════════════════════════════
+   JOB DETAIL MODAL
+════════════════════════════════════ */
+.job-detail-modal { width: 700px; }
+
+.jdm-header {
+  padding: 18px 22px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.jdm-rego {
+  font-family: var(--mono);
+  font-size: 30px;
+  letter-spacing: 4px;
+  color: var(--text);
+  line-height: 1;
+}
+
+.jdm-meta {
+  font-size: 13px;
+  color: var(--text2);
+  margin-top: 5px;
+}
+
+.jdm-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.jdm-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+
+.jdm-col {
+  padding: 18px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.jdm-col:first-child {
+  border-right: 1px solid var(--border);
+}
+
+.jdm-section-title {
+  font-family: var(--head);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--accent);
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+.jdm-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.jdm-field label {
+  font-family: var(--head);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.jdm-inp {
+  background: var(--card2);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  color: var(--text);
+  font-family: var(--body);
+  font-size: 13px;
+  padding: 7px 10px;
+  outline: none;
+  transition: border-color 0.15s;
+  width: 100%;
+}
+.jdm-inp:focus { border-color: var(--accent); }
+.jdm-inp::placeholder { color: var(--muted); }
+.jdm-inp-mono { font-family: var(--mono); font-size: 16px; letter-spacing: 3px; text-transform: uppercase; }
+
+select.jdm-inp { cursor: pointer; }
+select.jdm-inp option { background: var(--card); }
+
+textarea.jdm-inp { resize: vertical; min-height: 72px; }
+
+/* Parts section inside job detail */
+.jdm-parts-area {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.jdm-parts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.jdm-part-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 6px 10px;
+  gap: 8px;
+}
+
+.jdm-part-name {
+  font-size: 12px;
+  font-weight: 500;
+  flex: 1;
+  color: var(--text);
+}
+
+.jdm-part-oem {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 1px;
+}
+
+.jdm-part-no-oem {
+  font-size: 10px;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.jdm-part-actions {
+  display: flex;
+  gap: 3px;
+}
+
+.jdm-add-part-row {
+  display: flex;
+  gap: 6px;
+}
+
+.jdm-add-part-row .jdm-inp { flex: 1; }
+
+/* Status badge */
+.status-select-wrap {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.status-btn {
+  font-family: var(--head);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  border-radius: 4px;
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.12s;
+  flex: 1;
+  text-align: center;
+}
+.status-btn:hover { color: var(--text); border-color: var(--text2); }
+.status-btn.active-waiting  { background: rgba(234,179,8,0.15);  color: var(--yellow); border-color: var(--yellow); }
+.status-btn.active-progress { background: rgba(59,130,246,0.15); color: var(--blue);   border-color: var(--blue); }
+.status-btn.active-approval { background: rgba(239,68,68,0.15);  color: var(--red);    border-color: var(--red); }
+.status-btn.active-done     { background: rgba(34,197,94,0.15);  color: var(--green);  border-color: var(--green); }
+
+.pri-btn-wrap {
+  display: flex;
+  gap: 6px;
+}
+.pri-btn {
+  font-family: var(--head);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 5px 10px;
+  border-radius: 4px;
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.12s;
+  flex: 1;
+  text-align: center;
+}
+.pri-btn:hover { color: var(--text); }
+.pri-btn.active-urgent { background: rgba(239,68,68,0.15);  color: #fca5a5; border-color: rgba(239,68,68,0.4); }
+.pri-btn.active-high   { background: rgba(249,115,22,0.15); color: #fdba74; border-color: rgba(249,115,22,0.4); }
+.pri-btn.active-normal { background: rgba(34,197,94,0.12);  color: #86efac; border-color: rgba(34,197,94,0.3); }
+.pri-btn.active-low    { background: rgba(71,85,105,0.2);   color: #94a3b8; border-color: rgba(71,85,105,0.4); }
+
+.jdm-footer {
+  padding: 14px 22px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface);
+}
+
+.jdm-footer-left { display: flex; gap: 8px; }
+.jdm-footer-right { display: flex; gap: 8px; }
+
+/* activity / history log */
+.activity-log {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.activity-entry {
+  font-size: 11px;
+  color: var(--text2);
+  padding: 5px 8px;
+  background: var(--card2);
+  border-left: 2px solid var(--border2);
+  border-radius: 0 3px 3px 0;
+  line-height: 1.4;
+}
+
+.activity-entry .ae-time { color: var(--muted); font-family: var(--mono); font-size: 10px; }
+.activity-entry .ae-action { color: var(--text); font-weight: 600; }
+
+/* ─── LOADING SPINNER ─── */
+.spinner {
+  display: inline-block;
+  width: 14px; height: 14px;
+  border: 2px solid var(--border2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loading-row {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; color: var(--text2);
+  padding: 12px 0;
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<header>
+  <div class="logo">Pit<em>Lane</em></div>
+  <nav class="nav-tabs">
+    <button class="nav-tab active" onclick="showView('board')" id="tab-board">
+      ⬛ Job Board <span class="tab-count" id="tc-board">0</span>
+    </button>
+    <button class="nav-tab" onclick="showView('lookup')" id="tab-lookup">
+      🔍 Parts Lookup
+    </button>
+    <button class="nav-tab" onclick="showView('database')" id="tab-database">
+      🗄 Parts Database <span class="tab-count" id="tc-db">0</span>
+    </button>
+  </nav>
+  <div class="header-right">
+    <button class="btn btn-accent" onclick="openJobModal()">+ New Job</button>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════
+     VIEW 1: JOB BOARD
+═══════════════════════════════════ -->
+<div class="view active" id="view-board">
+  <div class="board-toolbar">
+    <input class="board-search" type="text" placeholder="🔎  Search jobs, rego, customer..." oninput="filterBoard(this.value)" id="boardSearch">
+    <select class="filter-select" onchange="filterBoard()" id="priFilter">
+      <option value="">All Priorities</option>
+      <option value="urgent">Urgent</option>
+      <option value="high">High</option>
+      <option value="normal">Normal</option>
+      <option value="low">Low</option>
+    </select>
+    <div style="margin-left:auto;font-size:12px;color:var(--muted);" id="boardStats"></div>
+  </div>
+  <div class="board-wrap">
+    <div class="board" id="board">
+      <!-- columns injected by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     VIEW 2: PARTS LOOKUP
+═══════════════════════════════════ -->
+<div class="view" id="view-lookup">
+  <div class="lookup-view">
+
+    <!-- LEFT: SEARCH PANEL -->
+    <div class="lookup-left">
+      <div class="panel-head">
+        <div class="panel-title">OEM Parts Lookup</div>
+        <div class="panel-sub">Search by vehicle + part description</div>
+      </div>
+
+      <div class="lookup-form">
+        <div class="steps">
+          <div class="step active" id="step1"><div class="step-num">1</div> Vehicle</div>
+          <div class="step-line"></div>
+          <div class="step" id="step2"><div class="step-num">2</div> Part</div>
+          <div class="step-line"></div>
+          <div class="step" id="step3"><div class="step-num">3</div> Result</div>
+        </div>
+
+        <!-- VEHICLE -->
+        <div class="inp-row">
+          <div class="form-group">
+            <label>Make</label>
+            <select class="inp" id="lu-make" onchange="onMakeChange()">
+              <option value="">Select...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Model</label>
+            <select class="inp" id="lu-model" onchange="onModelChange()" disabled>
+              <option value="">Select...</option>
+            </select>
+          </div>
+        </div>
+        <div class="inp-row">
+          <div class="form-group">
+            <label>Year</label>
+            <select class="inp" id="lu-year" onchange="onYearChange()" disabled>
+              <option value="">Select...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Engine (opt)</label>
+            <input class="inp" type="text" id="lu-engine" placeholder="e.g. 2.5L 4cyl">
+          </div>
+        </div>
+
+        <div class="vehicle-found" id="vehicleFound">
+          <strong id="vf-name">—</strong>
+          <span id="vf-detail">—</span>
+        </div>
+        <div class="vehicle-error" id="vehicleError"></div>
+
+        <!-- PART SEARCH -->
+        <div class="form-group">
+          <label>Part Description</label>
+          <div class="part-search-wrap">
+            <input class="inp" type="text" id="lu-part" placeholder="e.g. front brake pads, oil filter..." onkeydown="if(event.key==='Enter')searchParts()">
+            <span class="search-shortcut">↵ Enter</span>
+          </div>
+        </div>
+
+        <button class="btn btn-blue" style="width:100%;" onclick="searchParts()">
+          Search Parts Database
+        </button>
+      </div>
+
+      <!-- RESULTS -->
+      <div class="lookup-results" id="lookupResults">
+        <div class="no-results" style="padding-top:40px;">
+          <div style="font-size:32px;margin-bottom:8px;">🔧</div>
+          Select a vehicle and enter a part description to search
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: DETAIL PANEL -->
+    <div class="lookup-right">
+      <div class="detail-panel" id="detailPanel">
+        <div class="detail-empty" id="detailEmpty">
+          <div class="detail-empty-icon">📋</div>
+          <h3>Select a Part</h3>
+          <p>Search for a part on the left, then click a result to see full OEM details and aftermarket alternatives.</p>
+        </div>
+      </div>
+
+      <div class="add-to-job-bar" id="addToJobBar" style="display:none;">
+        <div style="flex:1;">
+          <div style="font-size:12px;color:var(--text2);" id="selected-part-name">—</div>
+          <div style="font-family:var(--mono);font-size:14px;color:var(--accent);letter-spacing:1px;" id="selected-oem">—</div>
+        </div>
+        <select class="inp" style="width:180px;" id="addToJobSelect">
+          <option value="">Add to job card...</option>
+        </select>
+        <button class="btn btn-green btn-sm" onclick="addPartToJob()">Add ✓</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     VIEW 3: PARTS DATABASE
+═══════════════════════════════════ -->
+<div class="view" id="view-database">
+  <div class="db-view">
+    <div class="db-toolbar">
+      <input class="board-search" type="text" placeholder="🔎  Search parts database..." oninput="renderDB(this.value)" id="dbSearch">
+      <select class="filter-select" onchange="renderDB()" id="dbMakeFilter">
+        <option value="">All Makes</option>
+      </select>
+      <div style="margin-left:auto;">
+        <button class="btn btn-accent btn-sm" onclick="openAddPartModal()">+ Add OEM Entry</button>
+      </div>
+    </div>
+    <div class="db-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Part Name</th>
+            <th>OEM Number</th>
+            <th>Brand</th>
+            <th>Compatible Makes</th>
+            <th>Category</th>
+            <th>Aftermarket #</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="dbTableBody"></tbody>
+      </table>
+      <div id="dbEmpty" style="display:none;" class="no-results" style="padding:40px;">
+        No parts in database yet. Click <strong>+ Add OEM Entry</strong> to start building your library.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     MODAL: NEW JOB CARD
+═══════════════════════════════════ -->
+<div class="overlay" id="jobOverlay" onclick="closeOverlay(event,'jobOverlay')">
+  <div class="modal modal-lg">
+    <div class="modal-head">
+      <div class="modal-title">New Job Card</div>
+      <button class="modal-close" onclick="closeModal('jobOverlay')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="inp-row">
+        <div class="form-group" style="position:relative;">
+          <label>NZ Plate / Rego *</label>
+          <input class="inp inp-mono" type="text" id="jm-rego" placeholder="ABC123" maxlength="8" oninput="this.value=this.value.toUpperCase()">
+        </div>
+        <div class="form-group">
+          <label>Priority</label>
+          <select class="inp" id="jm-priority">
+            <option value="normal">Normal</option>
+            <option value="high">High</option>
+            <option value="urgent">🔴 Urgent</option>
+            <option value="low">Low</option>
+          </select>
+        </div>
+      </div>
+      <div class="inp-row">
+        <div class="form-group">
+          <label>Customer Name *</label>
+          <input class="inp" type="text" id="jm-customer" placeholder="e.g. James Holden">
+        </div>
+        <div class="form-group">
+          <label>Phone</label>
+          <input class="inp" type="text" id="jm-phone" placeholder="021 000 0000">
+        </div>
+      </div>
+      <div class="inp-row">
+        <div class="form-group">
+          <label>Make / Model</label>
+          <input class="inp" type="text" id="jm-vehicle" placeholder="e.g. Toyota Hilux">
+        </div>
+        <div class="form-group">
+          <label>Year</label>
+          <input class="inp" type="text" id="jm-year" placeholder="e.g. 2019">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Parts Requested</label>
+        <div class="parts-row">
+          <input class="inp" type="text" id="jm-part-inp" placeholder="Type part name and press Add..." onkeydown="if(event.key==='Enter')addJobPart()">
+          <button class="btn btn-blue btn-sm" onclick="addJobPart()">+ Add</button>
+        </div>
+        <div class="tags-wrap" id="jm-parts-tags">
+          <span style="font-size:11px;color:var(--muted);align-self:center;">No parts yet</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Job Notes</label>
+        <textarea class="inp" id="jm-notes" rows="3" placeholder="Faults, customer requests, special instructions..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Column</label>
+        <select class="inp" id="jm-column">
+          <option value="waiting">Waiting on Parts</option>
+          <option value="progress">In Progress</option>
+          <option value="approval">Awaiting Approval</option>
+          <option value="done">Complete</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('jobOverlay')">Cancel</button>
+      <button class="btn btn-accent" onclick="saveJob()">Create Job Card</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     MODAL: ADD/EDIT OEM PART
+═══════════════════════════════════ -->
+<div class="overlay" id="partOverlay" onclick="closeOverlay(event,'partOverlay')">
+  <div class="modal modal-lg">
+    <div class="modal-head">
+      <div class="modal-title" id="partModalTitle">Add OEM Part Entry</div>
+      <button class="modal-close" onclick="closeModal('partOverlay')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="inp-row">
+        <div class="form-group">
+          <label>Part Name *</label>
+          <input class="inp" type="text" id="pm-name" placeholder="e.g. Front Brake Pads">
+        </div>
+        <div class="form-group">
+          <label>Category</label>
+          <select class="inp" id="pm-category">
+            <option>Brakes</option>
+            <option>Engine</option>
+            <option>Filters</option>
+            <option>Suspension</option>
+            <option>Transmission</option>
+            <option>Electrical</option>
+            <option>Cooling</option>
+            <option>Exhaust</option>
+            <option>Body</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="inp-row">
+        <div class="form-group">
+          <label>OEM Number *</label>
+          <input class="inp inp-mono" type="text" id="pm-oem" placeholder="e.g. 04465-0K290">
+        </div>
+        <div class="form-group">
+          <label>OEM Brand</label>
+          <input class="inp" type="text" id="pm-brand" placeholder="e.g. Toyota, Nissan, Honda">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Compatible Makes (comma separated)</label>
+        <input class="inp" type="text" id="pm-makes" placeholder="e.g. Toyota, Lexus">
+      </div>
+      <div class="form-group">
+        <label>Compatible Models (comma separated)</label>
+        <input class="inp" type="text" id="pm-models" placeholder="e.g. Hilux, Fortuner, 4Runner">
+      </div>
+      <div class="inp-row">
+        <div class="form-group">
+          <label>Year Range From</label>
+          <input class="inp" type="text" id="pm-year-from" placeholder="e.g. 2015">
+        </div>
+        <div class="form-group">
+          <label>Year Range To</label>
+          <input class="inp" type="text" id="pm-year-to" placeholder="e.g. 2023">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Aftermarket Alternatives (Brand: Number, comma separated)</label>
+        <input class="inp" type="text" id="pm-afm" placeholder="e.g. Bendix: DB1234, Repco: BPF987">
+      </div>
+      <div class="form-group">
+        <label>Notes</label>
+        <textarea class="inp" id="pm-notes" rows="2" placeholder="Fitment notes, variants, special instructions..."></textarea>
+      </div>
+      <input type="hidden" id="pm-edit-id">
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('partOverlay')">Cancel</button>
+      <button class="btn btn-accent" onclick="savePart()">Save Part</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     MODAL: JOB CARD DETAIL / EDIT
+═══════════════════════════════════ -->
+<div class="overlay" id="jobDetailOverlay" onclick="closeOverlay(event,'jobDetailOverlay')">
+  <div class="modal job-detail-modal">
+
+    <div class="jdm-header">
+      <div>
+        <div class="jdm-rego" id="jdm-rego-display">—</div>
+        <div class="jdm-meta" id="jdm-meta-display">—</div>
+      </div>
+      <div class="jdm-header-right">
+        <span style="font-size:11px;color:var(--muted);font-family:var(--mono);" id="jdm-date-display">—</span>
+        <button class="modal-close" onclick="closeModal('jobDetailOverlay')">✕</button>
+      </div>
+    </div>
+
+    <div class="jdm-body">
+
+      <!-- LEFT: JOB INFO -->
+      <div class="jdm-col">
+        <div class="jdm-section-title">Vehicle & Customer</div>
+
+        <div class="jdm-field">
+          <label>NZ Plate / Rego</label>
+          <input class="jdm-inp jdm-inp-mono" type="text" id="jdm-rego" maxlength="8"
+            oninput="this.value=this.value.toUpperCase(); document.getElementById('jdm-rego-display').textContent=this.value||'—'">
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div class="jdm-field">
+            <label>Make / Model</label>
+            <input class="jdm-inp" type="text" id="jdm-vehicle" placeholder="e.g. Toyota Hilux"
+              oninput="updateMetaDisplay()">
+          </div>
+          <div class="jdm-field">
+            <label>Year</label>
+            <input class="jdm-inp" type="text" id="jdm-year" placeholder="e.g. 2019"
+              oninput="updateMetaDisplay()">
+          </div>
+        </div>
+
+        <div class="jdm-field">
+          <label>Customer Name</label>
+          <input class="jdm-inp" type="text" id="jdm-customer" placeholder="Full name"
+            oninput="updateMetaDisplay()">
+        </div>
+
+        <div class="jdm-field">
+          <label>Phone</label>
+          <input class="jdm-inp" type="text" id="jdm-phone" placeholder="021 000 0000">
+        </div>
+
+        <div class="jdm-field">
+          <label>Job Notes</label>
+          <textarea class="jdm-inp" id="jdm-notes" placeholder="Faults, customer requests, special instructions..."></textarea>
+        </div>
+
+        <div class="jdm-section-title">Status & Priority</div>
+
+        <div class="jdm-field">
+          <label>Column</label>
+          <div class="status-select-wrap">
+            <button class="status-btn" data-col="waiting"  onclick="setJobColumn('waiting')">⏳ Waiting</button>
+            <button class="status-btn" data-col="progress" onclick="setJobColumn('progress')">🔧 In Progress</button>
+            <button class="status-btn" data-col="approval" onclick="setJobColumn('approval')">📋 Approval</button>
+            <button class="status-btn" data-col="done"     onclick="setJobColumn('done')">✅ Done</button>
+          </div>
+        </div>
+
+        <div class="jdm-field">
+          <label>Priority</label>
+          <div class="pri-btn-wrap">
+            <button class="pri-btn" data-pri="urgent" onclick="setJobPriority('urgent')">🔴 Urgent</button>
+            <button class="pri-btn" data-pri="high"   onclick="setJobPriority('high')">🟠 High</button>
+            <button class="pri-btn" data-pri="normal" onclick="setJobPriority('normal')">🟢 Normal</button>
+            <button class="pri-btn" data-pri="low"    onclick="setJobPriority('low')">⚪ Low</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: PARTS + ACTIVITY -->
+      <div class="jdm-col">
+        <div class="jdm-section-title">Parts on this Job</div>
+
+        <div class="jdm-parts-area">
+          <div class="jdm-parts-list" id="jdm-parts-list"></div>
+          <div class="jdm-add-part-row">
+            <input class="jdm-inp" type="text" id="jdm-new-part"
+              placeholder="Type part name and press Add..."
+              onkeydown="if(event.key==='Enter')addPartToOpenJob()">
+            <button class="btn btn-blue btn-sm" onclick="addPartToOpenJob()">+ Add</button>
+          </div>
+        </div>
+
+        <div class="jdm-section-title" style="margin-top:4px;">Activity Log</div>
+        <div class="activity-log" id="jdm-activity-log"></div>
+      </div>
+
+    </div>
+
+    <div class="jdm-footer">
+      <div class="jdm-footer-left">
+        <button class="btn btn-ghost btn-sm"
+          style="color:var(--red);border-color:rgba(239,68,68,0.3);"
+          onclick="deleteJobFromDetail()">🗑 Delete Job</button>
+      </div>
+      <div class="jdm-footer-right">
+        <button class="btn btn-ghost btn-sm" onclick="closeModal('jobDetailOverlay')">Cancel</button>
+        <button class="btn btn-accent btn-sm" onclick="saveJobDetail()">Save Changes ✓</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════════
+// If jobs is an empty array in storage (broken previous load), clear it so seed data runs
+(function() {
+  try {
+    const storedJobs = localStorage.getItem('pl_jobs');
+    if (storedJobs !== null && JSON.parse(storedJobs).length === 0) {
+      localStorage.removeItem('pl_jobs');
+    }
+    const storedParts = localStorage.getItem('pl_parts');
+    if (storedParts !== null && JSON.parse(storedParts).length === 0) {
+      localStorage.removeItem('pl_parts');
+    }
+  } catch(e) {
+    localStorage.removeItem('pl_jobs');
+    localStorage.removeItem('pl_parts');
+  }
+})();
+
+let jobs  = JSON.parse(localStorage.getItem('pl_jobs')  || '[]');
+let parts = JSON.parse(localStorage.getItem('pl_parts') || '[]');
+let jobModalParts = [];
+let currentPart   = null;
+let dragId        = null;
+let editPartId    = null;
+let openJobId     = null;
+let openJobParts  = [];
+let openJobColumn = 'waiting';
+let openJobPri    = 'normal';
+
+// ════════════════════════════════════════════════════════
+// HELPERS  (defined first so seed data can use them)
+// ════════════════════════════════════════════════════════
+function uid() { return '_'+Math.random().toString(36).slice(2,9); }
+function today() { return new Date().toLocaleDateString('en-NZ',{day:'numeric',month:'short',year:'numeric'}); }
+function saveJobs()  { localStorage.setItem('pl_jobs',  JSON.stringify(jobs));  }
+function saveParts() { localStorage.setItem('pl_parts', JSON.stringify(parts)); updateDBCount(); }
+
+// ════════════════════════════════════════════════════════
+// SEED DATA  (only loads if localStorage is empty)
+// ════════════════════════════════════════════════════════
+if (jobs.length === 0) {
+  jobs = [
+    { id:uid(), rego:'GHT421', customer:'Mike Tane',     phone:'021 555 1234', vehicle:'Toyota Hilux',    year:'2018', parts:['Front Brake Pads','Brake fluid'],    notes:'Squealing on left front.',   priority:'urgent', column:'progress', date:today(), activity:[] },
+    { id:uid(), rego:'RXZ992', customer:'Sarah Collins', phone:'027 444 8800', vehicle:'Subaru Forester', year:'2016', parts:['Subaru Air Filter','Engine Oil Filter'], notes:'100,000km service.',      priority:'normal', column:'waiting',  date:today(), activity:[] },
+    { id:uid(), rego:'KBB777', customer:'Dave Ngata',    phone:'021 321 9900', vehicle:'Mazda Atenza',    year:'2020', parts:['Cabin Air Filter'],                  notes:'A/C smells musty.',          priority:'low',    column:'approval', date:today(), activity:[] },
+    { id:uid(), rego:'FLX203', customer:'Priya Sharma',  phone:'022 111 4455', vehicle:'Honda CR-V',      year:'2017', parts:['CV Axle Shaft (Left)','Front Wheel Bearing'], notes:'Clicking on hard left turn.', priority:'high', column:'progress', date:today(), activity:[] },
+  ];
+  saveJobs();
+}
+
+if (parts.length === 0) {
+  parts = [
+    { id:uid(), name:'Front Brake Pads',     oem:'04465-0K290',   brand:'Toyota', category:'Brakes',     makes:['Toyota'],         models:['Hilux','Fortuner'],           yearFrom:'2015', yearTo:'2023', afm:'Bendix: DB1881, Repco: BPF04465',   notes:'Suits GGN/KUN series. Check rotor condition.' },
+    { id:uid(), name:'Rear Brake Pads',      oem:'04466-0K200',   brand:'Toyota', category:'Brakes',     makes:['Toyota'],         models:['Hilux','4Runner'],            yearFrom:'2015', yearTo:'2023', afm:'Bendix: DB1882',                    notes:'' },
+    { id:uid(), name:'Oil Filter',           oem:'15400-RTA-003', brand:'Honda',  category:'Filters',    makes:['Honda'],          models:['CR-V','Accord','Civic'],      yearFrom:'2012', yearTo:'2022', afm:'Ryco: Z436, Repco: OF436',          notes:'Standard thread. Use with 5W-30.' },
+    { id:uid(), name:'Engine Oil Filter',    oem:'90915-YZZD2',   brand:'Toyota', category:'Filters',    makes:['Toyota','Lexus'], models:['Hilux','Camry','RAV4'],       yearFrom:'2010', yearTo:'2024', afm:'Ryco: Z386, Baldwin: B7317',        notes:'Common Toyota fitment across many models.' },
+    { id:uid(), name:'Cabin Air Filter',     oem:'87139-33010',   brand:'Toyota', category:'Filters',    makes:['Toyota','Mazda'], models:['Atenza','Camry','Aurion'],    yearFrom:'2014', yearTo:'2022', afm:'Ryco: RCA261P',                     notes:'Check for charcoal variant if A/C smell present.' },
+    { id:uid(), name:'Front Wheel Bearing',  oem:'44300-T0A-951', brand:'Honda',  category:'Suspension', makes:['Honda'],          models:['CR-V','HR-V'],                yearFrom:'2012', yearTo:'2021', afm:'Timken: 512449, SKF: BR930788',     notes:'Press-fit hub assembly. Align after install.' },
+    { id:uid(), name:'CV Axle Shaft (Left)', oem:'44306-T0A-951', brand:'Honda',  category:'Suspension', makes:['Honda'],          models:['CR-V'],                       yearFrom:'2012', yearTo:'2021', afm:'GSP: NCV73602',                     notes:'Check boot integrity. Replace both if high km.' },
+    { id:uid(), name:'Air Filter',           oem:'17801-0L040',   brand:'Toyota', category:'Filters',    makes:['Toyota'],         models:['Hilux','Land Cruiser Prado'], yearFrom:'2015', yearTo:'2023', afm:'Ryco: A1781, Wesfil: WA5160',       notes:'' },
+    { id:uid(), name:'Spark Plug Set (x4)',  oem:'22401-JA01B',   brand:'Nissan', category:'Engine',     makes:['Nissan'],         models:['Skyline','Altima','Teana'],   yearFrom:'2006', yearTo:'2018', afm:'NGK: DILKAR7A11, Denso: SK20PR-A11',notes:'Iridium type. Gap: 1.1mm.' },
+    { id:uid(), name:'Subaru Air Filter',    oem:'16546-AA090',   brand:'Subaru', category:'Filters',    makes:['Subaru'],         models:['Forester','Impreza','WRX'],   yearFrom:'2008', yearTo:'2021', afm:'Ryco: A1490, Wesfil: WA5050',       notes:'' },
+  ];
+  saveParts();
+}
+
+function toast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast toast-${type} show`;
+  setTimeout(()=> t.classList.remove('show'), 2800);
+}
+
+function updateDBCount() {
+  document.getElementById('tc-db').textContent = parts.length;
+}
+
+// ════════════════════════════════════════════════════════
+// VIEW NAVIGATION
+// ════════════════════════════════════════════════════════
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+  if (name === 'database') renderDB();
+  if (name === 'lookup')   initLookup();
+  if (name === 'board')    renderBoard();
+}
+
+// ════════════════════════════════════════════════════════
+// BOARD
+// ════════════════════════════════════════════════════════
+const COLS = [
+  { id:'waiting',  label:'Waiting on Parts', pip:'pip-waiting'  },
+  { id:'progress', label:'In Progress',      pip:'pip-progress' },
+  { id:'approval', label:'Awaiting Approval',pip:'pip-approval' },
+  { id:'done',     label:'Complete',         pip:'pip-done'     },
+];
+
+function renderBoard(search='', pri='') {
+  search = search || document.getElementById('boardSearch').value.toLowerCase();
+  pri    = pri    || document.getElementById('priFilter').value;
+
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+
+  let total = 0;
+  COLS.forEach(col => {
+    let colJobs = jobs.filter(j => j.column === col.id);
+
+    if (search) colJobs = colJobs.filter(j =>
+      j.rego.toLowerCase().includes(search) ||
+      j.customer.toLowerCase().includes(search) ||
+      j.vehicle.toLowerCase().includes(search) ||
+      j.parts.some(p => p.toLowerCase().includes(search))
+    );
+    if (pri) colJobs = colJobs.filter(j => j.priority === pri);
+    total += colJobs.length;
+
+    const colEl = document.createElement('div');
+    colEl.className = 'column';
+    colEl.id = 'col-'+col.id;
+    colEl.setAttribute('ondragover','onDragOver(event)');
+    colEl.setAttribute('ondrop',`onDrop(event,'${col.id}')`);
+
+    const cardsHTML = colJobs.length === 0
+      ? '<div class="empty-state">Drop cards here<br>or click ＋ Add</div>'
+      : colJobs.map(j => jobCardHTML(j)).join('');
+
+    colEl.innerHTML = `
+      <div class="col-header">
+        <div class="col-title">
+          <span class="col-pip ${col.pip}"></span>${col.label}
+        </div>
+        <span class="col-count">${colJobs.length}</span>
+      </div>
+      <div class="col-body" id="cards-${col.id}">${cardsHTML}</div>
+      <div class="col-foot">
+        <button class="add-btn" onclick="openJobModal('${col.id}')">＋ Add Job Card</button>
+      </div>`;
+    board.appendChild(colEl);
+  });
+
+  document.getElementById('tc-board').textContent = jobs.length;
+  document.getElementById('boardStats').textContent =
+    `${total} job${total!==1?'s':''} shown · ${jobs.length} total`;
+}
+
+function jobCardHTML(j) {
+  const partsHTML = j.parts.map(p => {
+    const matched = parts.find(db => db.name.toLowerCase() === p.toLowerCase());
+    return `<span class="part-chip ${matched?'has-oem':''}" title="${matched?'OEM: '+matched.oem:''}">${p}${matched?' ✓':''}</span>`;
+  }).join('');
+
+  return `
+  <div class="job-card jc-pri-${j.priority}" draggable="true"
+       ondragstart="onDragStart(event,'${j.id}')"
+       ondragend="onDragEnd()"
+       onclick="openJobDetail('${j.id}')"
+       id="jcard-${j.id}"
+       style="cursor:pointer;">
+    <div class="jc-top">
+      <div class="rego-plate">${j.rego}</div>
+      <div class="jc-actions">
+        <button class="icon-btn" title="Parts lookup" onclick="event.stopPropagation();quickLookup('${j.id}')">🔍</button>
+        <button class="icon-btn" title="Edit" onclick="event.stopPropagation();openJobDetail('${j.id}')">✏️</button>
+        <button class="icon-btn" title="Delete" onclick="event.stopPropagation();deleteJob('${j.id}')">🗑</button>
+      </div>
+    </div>
+    <div class="jc-vehicle">${j.vehicle} ${j.year}</div>
+    <div class="jc-customer">👤 ${j.customer} · ${j.phone}</div>
+    <div class="jc-parts">${partsHTML}</div>
+    ${j.notes?`<div style="font-size:11px;color:var(--text2);line-height:1.5;margin-bottom:4px;">${j.notes}</div>`:''}
+    <div class="jc-foot">
+      <span class="jc-date">${j.date}</span>
+      <span class="pri-pill pri-${j.priority}">${j.priority}</span>
+    </div>
+  </div>`;
+}
+
+function filterBoard(val) { renderBoard(); }
+
+function deleteJob(id) {
+  if (!confirm('Delete this job card?')) return;
+  jobs = jobs.filter(j => j.id !== id);
+  saveJobs();
+  renderBoard();
+  toast('Job card deleted.', 'info');
+}
+
+function quickLookup(id) {
+  const j = jobs.find(x => x.id === id);
+  if (!j) return;
+  showView('lookup');
+  // Pre-fill make
+  const makeEl = document.getElementById('lu-make');
+  const makeVal = j.vehicle.split(' ')[0];
+  for (let o of makeEl.options) {
+    if (o.value.toLowerCase() === makeVal.toLowerCase()) {
+      makeEl.value = o.value;
+      onMakeChange();
+      break;
+    }
+  }
+
+// ════════════════════════════════════════════════════════
+// JOB DETAIL MODAL
+// ════════════════════════════════════════════════════════
+function openJobDetail(id) {
+  const j = jobs.find(x => x.id === id);
+  if (!j) return;
+
+  openJobId     = id;
+  openJobParts  = [...j.parts];
+  openJobColumn = j.column;
+  openJobPri    = j.priority;
+
+  // Populate fields
+  document.getElementById('jdm-rego').value     = j.rego;
+  document.getElementById('jdm-vehicle').value  = j.vehicle;
+  document.getElementById('jdm-year').value     = j.year;
+  document.getElementById('jdm-customer').value = j.customer;
+  document.getElementById('jdm-phone').value    = j.phone;
+  document.getElementById('jdm-notes').value    = j.notes || '';
+
+  // Header display
+  document.getElementById('jdm-rego-display').textContent = j.rego;
+  document.getElementById('jdm-meta-display').textContent = j.vehicle + ' ' + j.year + '  ·  ' + j.customer;
+  document.getElementById('jdm-date-display').textContent = 'Created: ' + j.date;
+
+  // Status buttons
+  refreshStatusBtns(j.column);
+
+  // Priority buttons
+  refreshPriBtns(j.priority);
+
+  // Parts list
+  renderDetailParts();
+
+  // Activity log
+  renderActivityLog(j);
+
+  document.getElementById('jobDetailOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('jdm-rego').focus(), 100);
+}
+
+function updateMetaDisplay() {
+  const rego     = document.getElementById('jdm-rego').value     || '—';
+  const vehicle  = document.getElementById('jdm-vehicle').value  || '';
+  const year     = document.getElementById('jdm-year').value     || '';
+  const customer = document.getElementById('jdm-customer').value || '';
+  document.getElementById('jdm-rego-display').textContent = rego;
+  document.getElementById('jdm-meta-display').textContent =
+    (vehicle + ' ' + year).trim() + (customer ? '  ·  ' + customer : '');
+}
+
+function refreshStatusBtns(col) {
+  openJobColumn = col;
+  document.querySelectorAll('[data-col]').forEach(btn => {
+    btn.className = 'status-btn';
+    if (btn.dataset.col === col) btn.classList.add('active-' + col);
+  });
+}
+
+function refreshPriBtns(pri) {
+  openJobPri = pri;
+  document.querySelectorAll('[data-pri]').forEach(btn => {
+    btn.className = 'pri-btn';
+    if (btn.dataset.pri === pri) btn.classList.add('active-' + pri);
+  });
+}
+
+function setJobColumn(col) { refreshStatusBtns(col); }
+function setJobPriority(pri) { refreshPriBtns(pri); }
+
+function renderDetailParts() {
+  const container = document.getElementById('jdm-parts-list');
+  if (openJobParts.length === 0) {
+    container.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:6px 0;">No parts added yet</div>';
+    return;
+  }
+  container.innerHTML = openJobParts.map((p, i) => {
+    const dbMatch = parts.find(db => db.name.toLowerCase() === p.toLowerCase());
+    return `
+      <div class="jdm-part-row">
+        <span class="jdm-part-name">${p}</span>
+        ${dbMatch
+          ? `<span class="jdm-part-oem" title="OEM number">${dbMatch.oem}</span>`
+          : `<span class="jdm-part-no-oem">No OEM on file</span>`
+        }
+        <div class="jdm-part-actions">
+          ${!dbMatch ? `<button class="icon-btn" title="Look up OEM" onclick="lookupFromDetail('${p.replace(/'/g,"\'")}')">🔍</button>` : ''}
+          <button class="icon-btn" title="Remove part" onclick="removeDetailPart(${i})">×</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function addPartToOpenJob() {
+  const inp = document.getElementById('jdm-new-part');
+  const val = inp.value.trim();
+  if (!val) return;
+  openJobParts.push(val);
+  inp.value = '';
+  renderDetailParts();
+  inp.focus();
+}
+
+function removeDetailPart(i) {
+  const removed = openJobParts[i];
+  openJobParts.splice(i, 1);
+  renderDetailParts();
+  logActivity(openJobId, `Removed part: ${removed}`);
+}
+
+function lookupFromDetail(partName) {
+  closeModal('jobDetailOverlay');
+  showView('lookup');
+  setTimeout(() => {
+    document.getElementById('lu-part').value = partName;
+    searchParts();
+  }, 200);
+}
+
+function renderActivityLog(j) {
+  const log = j.activity || [];
+  const container = document.getElementById('jdm-activity-log');
+  if (log.length === 0) {
+    container.innerHTML = '<div style="font-size:11px;color:var(--muted);padding:4px 8px;">No activity yet — changes are logged when you save.</div>';
+    return;
+  }
+  container.innerHTML = [...log].reverse().map(e =>
+    `<div class="activity-entry">
+      <span class="ae-action">${e.action}</span>
+      <span class="ae-time"> · ${e.time}</span>
+    </div>`
+  ).join('');
+}
+
+function logActivity(id, action) {
+  const j = jobs.find(x => x.id === id);
+  if (!j) return;
+  if (!j.activity) j.activity = [];
+  const now = new Date().toLocaleString('en-NZ', {
+    day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'
+  });
+  j.activity.push({ action, time: now });
+}
+
+function saveJobDetail() {
+  const j = jobs.find(x => x.id === openJobId);
+  if (!j) return;
+
+  const newRego     = document.getElementById('jdm-rego').value.trim().toUpperCase();
+  const newVehicle  = document.getElementById('jdm-vehicle').value.trim();
+  const newYear     = document.getElementById('jdm-year').value.trim();
+  const newCustomer = document.getElementById('jdm-customer').value.trim();
+  const newPhone    = document.getElementById('jdm-phone').value.trim();
+  const newNotes    = document.getElementById('jdm-notes').value.trim();
+
+  if (!newRego)     { alert('Rego is required.'); return; }
+  if (!newCustomer) { alert('Customer name is required.'); return; }
+
+  // Build change log entries
+  const changes = [];
+  if (j.rego     !== newRego)        changes.push(`Rego changed to ${newRego}`);
+  if (j.vehicle  !== newVehicle)     changes.push(`Vehicle updated to ${newVehicle}`);
+  if (j.customer !== newCustomer)    changes.push(`Customer updated to ${newCustomer}`);
+  if (j.column   !== openJobColumn)  changes.push(`Moved to: ${openJobColumn}`);
+  if (j.priority !== openJobPri)     changes.push(`Priority set to: ${openJobPri}`);
+
+  const addedParts   = openJobParts.filter(p => !j.parts.includes(p));
+  const removedParts = j.parts.filter(p => !openJobParts.includes(p));
+  addedParts.forEach(p   => changes.push(`Added part: ${p}`));
+  removedParts.forEach(p => changes.push(`Removed part: ${p}`));
+
+  // Apply changes
+  j.rego     = newRego;
+  j.vehicle  = newVehicle  || 'Unknown';
+  j.year     = newYear     || '—';
+  j.customer = newCustomer;
+  j.phone    = newPhone    || '—';
+  j.notes    = newNotes;
+  j.column   = openJobColumn;
+  j.priority = openJobPri;
+  j.parts    = [...openJobParts];
+
+  // Log all changes
+  changes.forEach(c => logActivity(openJobId, c));
+  if (changes.length === 0) logActivity(openJobId, 'Job card viewed (no changes)');
+
+  saveJobs();
+  renderBoard();
+  closeModal('jobDetailOverlay');
+  toast(`✔ Job ${newRego} saved!`);
+}
+
+function deleteJobFromDetail() {
+  const j = jobs.find(x => x.id === openJobId);
+  if (!j) return;
+  if (!confirm(`Delete job card for ${j.rego} — ${j.customer}? This cannot be undone.`)) return;
+  jobs = jobs.filter(x => x.id !== openJobId);
+  saveJobs();
+  renderBoard();
+  closeModal('jobDetailOverlay');
+  toast('Job card deleted.', 'info');
+}
+
+// ─── DRAG & DROP ───
+function onDragStart(e, id) {
+  dragId = id;
+  setTimeout(() => document.getElementById('jcard-'+id)?.classList.add('dragging'), 0);
+  e.dataTransfer.effectAllowed = 'move';
+}
+function onDragEnd() {
+  document.querySelectorAll('.job-card').forEach(c => c.classList.remove('dragging'));
+}
+function onDragOver(e) {
+  e.preventDefault();
+  e.currentTarget.classList.add('drag-over');
+}
+document.addEventListener('dragleave', e => {
+  if (e.target.classList?.contains('column')) e.target.classList.remove('drag-over');
+});
+function onDrop(e, col) {
+  e.preventDefault();
+  document.querySelectorAll('.column').forEach(c => c.classList.remove('drag-over'));
+  if (!dragId) return;
+  const j = jobs.find(x => x.id === dragId);
+  if (j && j.column !== col) {
+    j.column = col;
+    saveJobs();
+    renderBoard();
+    toast('Card moved ✓');
+  }
+  dragId = null;
+}
+
+// ════════════════════════════════════════════════════════
+// JOB MODAL
+// ════════════════════════════════════════════════════════
+function openJobModal(col='waiting') {
+  jobModalParts = [];
+  document.getElementById('jm-column').value = col;
+  ['rego','customer','phone','vehicle','year','notes'].forEach(f => document.getElementById('jm-'+f).value='');
+  document.getElementById('jm-priority').value = 'normal';
+  renderJobParts();
+  document.getElementById('jobOverlay').classList.add('open');
+  setTimeout(()=>document.getElementById('jm-rego').focus(),100);
+}
+
+function addJobPart() {
+  const inp = document.getElementById('jm-part-inp');
+  const v = inp.value.trim();
+  if (!v) return;
+  jobModalParts.push(v);
+  inp.value = '';
+  renderJobParts();
+  inp.focus();
+}
+
+function removeJobPart(i) {
+  jobModalParts.splice(i,1);
+  renderJobParts();
+}
+
+function renderJobParts() {
+  const c = document.getElementById('jm-parts-tags');
+  if (!jobModalParts.length) {
+    c.innerHTML = '<span style="font-size:11px;color:var(--muted);">No parts yet</span>';
+    return;
+  }
+  c.innerHTML = jobModalParts.map((p,i)=>`
+    <span class="tag-item">${p}<button class="tag-rm" onclick="removeJobPart(${i})">×</button></span>
+  `).join('');
+}
+
+function saveJob() {
+  const rego     = document.getElementById('jm-rego').value.trim().toUpperCase();
+  const customer = document.getElementById('jm-customer').value.trim();
+  if (!rego)     { alert('Rego is required.'); return; }
+  if (!customer) { alert('Customer name is required.'); return; }
+  jobs.push({
+    id:       uid(),
+    rego,
+    customer,
+    phone:    document.getElementById('jm-phone').value.trim() || '—',
+    vehicle:  document.getElementById('jm-vehicle').value.trim() || 'Unknown',
+    year:     document.getElementById('jm-year').value.trim() || '—',
+    parts:    [...jobModalParts],
+    notes:    document.getElementById('jm-notes').value.trim(),
+    priority: document.getElementById('jm-priority').value,
+    column:   document.getElementById('jm-column').value,
+    date:     today(),
+  });
+  saveJobs();
+  renderBoard();
+  closeModal('jobOverlay');
+  toast('✔ Job card created!');
+}
+
+// ════════════════════════════════════════════════════════
+// PARTS LOOKUP — VEHICLE SELECTION via NHTSA API
+// ════════════════════════════════════════════════════════
+const MAKES = [
+  'Acura','Alfa Romeo','Audi','BMW','BYD','Chevrolet','Chrysler',
+  'Daihatsu','Dodge','Fiat','Ford','GMC','Great Wall','Holden',
+  'Honda','Hyundai','Infiniti','Isuzu','Jaguar','Jeep','Kia',
+  'Land Rover','Lexus','Lincoln','Mazda','Mercedes-Benz','Mitsubishi',
+  'Nissan','Porsche','RAM','Renault','Skoda','Subaru','Suzuki',
+  'Tesla','Toyota','Volkswagen','Volvo'
+];
+
+function initLookup() {
+  const makeEl = document.getElementById('lu-make');
+  if (makeEl.options.length <= 1) {
+    MAKES.forEach(m => {
+      const o = document.createElement('option');
+      o.value = m; o.textContent = m;
+      makeEl.appendChild(o);
+    });
+  }
+}
+
+async function onMakeChange() {
+  const make = document.getElementById('lu-make').value;
+  const modelEl = document.getElementById('lu-model');
+  const yearEl  = document.getElementById('lu-year');
+
+  modelEl.innerHTML = '<option value="">Loading...</option>';
+  modelEl.disabled = true;
+  yearEl.innerHTML  = '<option value="">Select...</option>';
+  yearEl.disabled   = true;
+  document.getElementById('vehicleFound').classList.remove('show');
+  document.getElementById('vehicleError').classList.remove('show');
+
+  if (!make) { modelEl.innerHTML = '<option value="">Select...</option>'; return; }
+
+  try {
+    const res = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/GetModelsForMake/${encodeURIComponent(make)}?format=json`);
+    const data = await res.json();
+    const models = [...new Set(data.Results.map(r => r.Model_Name))].sort();
+    modelEl.innerHTML = '<option value="">Select model...</option>';
+    models.forEach(m => {
+      const o = document.createElement('option');
+      o.value = m; o.textContent = m;
+      modelEl.appendChild(o);
+    });
+    modelEl.disabled = false;
+    setStep(2);
+  } catch(e) {
+    modelEl.innerHTML = '<option value="">Error loading — type manually</option>';
+    modelEl.disabled = false;
+  }
+}
+
+function onModelChange() {
+  const yearEl = document.getElementById('lu-year');
+  yearEl.innerHTML = '<option value="">Select year...</option>';
+  const currentYear = new Date().getFullYear();
+  for (let y = currentYear; y >= 1980; y--) {
+    const o = document.createElement('option');
+    o.value = y; o.textContent = y;
+    yearEl.appendChild(o);
+  }
+  yearEl.disabled = false;
+}
+
+function onYearChange() {
+  const make  = document.getElementById('lu-make').value;
+  const model = document.getElementById('lu-model').value;
+  const year  = document.getElementById('lu-year').value;
+
+  const vf = document.getElementById('vehicleFound');
+  const ve = document.getElementById('vehicleError');
+
+  if (make && model && year) {
+    document.getElementById('vf-name').textContent   = `${year} ${make} ${model}`;
+    document.getElementById('vf-detail').textContent = 'Vehicle identified — now search for a part below';
+    vf.classList.add('show');
+    ve.classList.remove('show');
+    setStep(2, true);
+  }
+}
+
+function setStep(active, vehicleDone=false) {
+  const s1 = document.getElementById('step1');
+  const s2 = document.getElementById('step2');
+  const s3 = document.getElementById('step3');
+  s1.className = 'step ' + (vehicleDone ? 'done' : 'active');
+  s2.className = 'step ' + (active >= 2 ? 'active' : '');
+  s3.className = 'step ' + (active >= 3 ? 'active' : '');
+}
+
+// ════════════════════════════════════════════════════════
+// PARTS SEARCH — local database
+// ════════════════════════════════════════════════════════
+function searchParts() {
+  const make  = document.getElementById('lu-make').value;
+  const model = document.getElementById('lu-model').value;
+  const year  = parseInt(document.getElementById('lu-year').value) || 0;
+  const query = document.getElementById('lu-part').value.trim().toLowerCase();
+
+  const resultsEl = document.getElementById('lookupResults');
+
+  if (!query) {
+    resultsEl.innerHTML = '<div class="no-results">Enter a part description to search</div>';
+    return;
+  }
+
+  resultsEl.innerHTML = '<div class="loading-row"><div class="spinner"></div> Searching parts database...</div>';
+
+  setTimeout(() => {
+    let results = parts.filter(p => {
+      // text match
+      const nameMatch  = p.name.toLowerCase().includes(query);
+      const catMatch   = p.category.toLowerCase().includes(query);
+      const noteMatch  = p.notes.toLowerCase().includes(query);
+      const textMatch  = nameMatch || catMatch || noteMatch;
+
+      // vehicle filter
+      let vehicleMatch = true;
+      if (make)  vehicleMatch = vehicleMatch && p.makes.some(m => m.toLowerCase() === make.toLowerCase());
+      if (model) vehicleMatch = vehicleMatch && (p.models.length === 0 || p.models.some(m => m.toLowerCase().includes(model.toLowerCase())));
+      if (year)  vehicleMatch = vehicleMatch && (!p.yearFrom || year >= parseInt(p.yearFrom)) && (!p.yearTo || year <= parseInt(p.yearTo));
+
+      return textMatch && vehicleMatch;
+    });
+
+    // Fallback: if no vehicle-filtered results, show all text matches
+    if (results.length === 0 && (make || model)) {
+      results = parts.filter(p =>
+        p.name.toLowerCase().includes(query) ||
+        p.category.toLowerCase().includes(query)
+      );
+    }
+
+    if (results.length === 0) {
+      resultsEl.innerHTML = `
+        <div class="no-results">
+          <div style="font-size:28px;margin-bottom:8px;">🔍</div>
+          No results found for "<strong>${query}</strong>"<br>
+          <span style="font-size:11px;">Try different keywords, or add this part to your database</span><br><br>
+          <button class="btn btn-accent btn-sm" onclick="openAddPartModal('${query}')">+ Add to Database</button>
+        </div>`;
+      return;
+    }
+
+    const label = document.createElement('div');
+    label.className = 'results-label';
+    label.innerHTML = `<span>${results.length} result${results!==1?'s':''} found</span>
+      <span style="color:var(--text2);font-size:10px;">${make?make+' ':''} ${model||''}</span>`;
+
+    const cards = results.map(p => `
+      <div class="result-card" onclick="showPartDetail('${p.id}')" id="rc-${p.id}">
+        <div class="rc-top">
+          <div>
+            <div class="rc-name">${p.name}</div>
+            <div class="rc-brand">${p.brand} · ${p.category}</div>
+          </div>
+          <div class="rc-oem">${p.oem}</div>
+        </div>
+        <div class="rc-tags">
+          ${p.makes.map(m=>`<span class="rc-tag">${m}</span>`).join('')}
+          ${p.yearFrom?`<span class="rc-tag">${p.yearFrom}–${p.yearTo||'now'}</span>`:''}
+        </div>
+        <div class="rc-source">Local database · click for full details</div>
+      </div>
+    `).join('');
+
+    resultsEl.innerHTML = '';
+    resultsEl.appendChild(label);
+    resultsEl.insertAdjacentHTML('beforeend', cards);
+    setStep(3);
+  }, 300);
+}
+
+function showPartDetail(id) {
+  const p = parts.find(x => x.id === id);
+  if (!p) return;
+  currentPart = p;
+
+  // Highlight selected
+  document.querySelectorAll('.result-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('rc-'+id)?.classList.add('selected');
+
+  const afmItems = p.afm ? p.afm.split(',').map(a => {
+    const [brand, num] = a.split(':').map(s => s.trim());
+    return `<div class="afm-item">
+      <div><div class="afm-brand">${brand||'—'}</div></div>
+      <div class="afm-num">${num||'—'}</div>
+    </div>`;
+  }).join('') : '<div style="color:var(--muted);font-size:12px;">No aftermarket alternatives recorded</div>';
+
+  const panel = document.getElementById('detailPanel');
+  panel.innerHTML = `
+    <div>
+      <div class="section-title">Part Identification</div>
+      <div class="oem-big">
+        <label>OEM Part Number</label>
+        <div class="oem-number">${p.oem}</div>
+        <button class="oem-copy" onclick="copyOEM('${p.oem}')">📋 Copy to clipboard</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title">Part Details</div>
+      <div class="detail-grid">
+        <div class="detail-field">
+          <label>Part Name</label>
+          <div class="val">${p.name}</div>
+        </div>
+        <div class="detail-field">
+          <label>Category</label>
+          <div class="val">${p.category}</div>
+        </div>
+        <div class="detail-field">
+          <label>OEM Brand</label>
+          <div class="val">${p.brand}</div>
+        </div>
+        <div class="detail-field">
+          <label>Year Range</label>
+          <div class="val">${p.yearFrom||'—'} – ${p.yearTo||'Current'}</div>
+        </div>
+        <div class="detail-field span2">
+          <label>Compatible Makes</label>
+          <div class="val">${p.makes.join(', ')||'—'}</div>
+        </div>
+        <div class="detail-field span2">
+          <label>Compatible Models</label>
+          <div class="val">${p.models.join(', ')||'—'}</div>
+        </div>
+        ${p.notes?`<div class="detail-field span2"><label>Notes</label><div class="val" style="font-size:12px;color:var(--text2);">${p.notes}</div></div>`:''}
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title">Aftermarket Alternatives</div>
+      <div class="afm-list">${afmItems}</div>
+    </div>
+
+    <div>
+      <div class="section-title">Actions</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-ghost btn-sm" onclick="openAddPartModal(null,'${p.id}')">✏️ Edit Entry</button>
+        <button class="btn btn-ghost btn-sm" onclick="deletePartEntry('${p.id}')">🗑 Delete</button>
+      </div>
+    </div>
+  `;
+
+  // Show add-to-job bar
+  document.getElementById('selected-part-name').textContent = p.name;
+  document.getElementById('selected-oem').textContent = p.oem;
+  populateJobSelect();
+  document.getElementById('addToJobBar').style.display = 'flex';
+}
+
+function copyOEM(oem) {
+  navigator.clipboard.writeText(oem).then(() => toast('OEM number copied!', 'info'));
+}
+
+function populateJobSelect() {
+  const sel = document.getElementById('addToJobSelect');
+  sel.innerHTML = '<option value="">Add to job card...</option>';
+  jobs.filter(j => j.column !== 'done').forEach(j => {
+    const o = document.createElement('option');
+    o.value = j.id;
+    o.textContent = `${j.rego} — ${j.customer}`;
+    sel.appendChild(o);
+  });
+}
+
+function addPartToJob() {
+  const jobId = document.getElementById('addToJobSelect').value;
+  if (!jobId || !currentPart) { toast('Select a job card first', 'warn'); return; }
+  const j = jobs.find(x => x.id === jobId);
+  if (!j) return;
+  if (!j.parts.includes(currentPart.name)) {
+    j.parts.push(currentPart.name);
+    saveJobs();
+    toast(`✔ "${currentPart.name}" added to ${j.rego}`, 'success');
+  } else {
+    toast('Part already on that job card', 'warn');
+  }
+}
+
+// ════════════════════════════════════════════════════════
+// PARTS DATABASE VIEW
+// ════════════════════════════════════════════════════════
+function renderDB(search='') {
+  search = search || document.getElementById('dbSearch').value.toLowerCase();
+  const makeF = document.getElementById('dbMakeFilter').value;
+
+  // Populate make filter
+  const makeFilter = document.getElementById('dbMakeFilter');
+  const allMakes = [...new Set(parts.flatMap(p => p.makes))].sort();
+  makeFilter.innerHTML = '<option value="">All Makes</option>';
+  allMakes.forEach(m => {
+    const o = document.createElement('option');
+    o.value = m; o.textContent = m;
+    makeFilter.appendChild(o);
+  });
+  if (makeF) makeFilter.value = makeF;
+
+  let filtered = parts;
+  if (search) filtered = filtered.filter(p =>
+    p.name.toLowerCase().includes(search) ||
+    p.oem.toLowerCase().includes(search)  ||
+    p.brand.toLowerCase().includes(search)||
+    p.category.toLowerCase().includes(search)
+  );
+  if (makeF) filtered = filtered.filter(p => p.makes.includes(makeF));
+
+  const tbody = document.getElementById('dbTableBody');
+  const empty = document.getElementById('dbEmpty');
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = filtered.map(p => `
+    <tr onclick="showView('lookup');setTimeout(()=>{showPartDetail('${p.id}')},100)">
+      <td><strong>${p.name}</strong></td>
+      <td class="td-oem">${p.oem}</td>
+      <td>${p.brand}</td>
+      <td><div class="td-makes">${p.makes.map(m=>`<span class="make-pill">${m}</span>`).join('')}</div></td>
+      <td><span style="font-size:11px;color:var(--text2);">${p.category}</span></td>
+      <td style="font-size:11px;color:var(--text2);">${p.afm ? p.afm.split(',')[0].trim() : '—'}</td>
+      <td>
+        <div class="td-actions" onclick="event.stopPropagation()">
+          <button class="btn btn-ghost btn-sm btn-icon" onclick="openAddPartModal(null,'${p.id}')">✏️</button>
+          <button class="btn btn-ghost btn-sm btn-icon" onclick="deletePartEntry('${p.id}')">🗑</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+
+  updateDBCount();
+}
+
+// ════════════════════════════════════════════════════════
+// ADD / EDIT PART MODAL
+// ════════════════════════════════════════════════════════
+function openAddPartModal(prefill=null, editId=null) {
+  editPartId = editId;
+  document.getElementById('pm-edit-id').value = editId || '';
+
+  if (editId) {
+    const p = parts.find(x => x.id === editId);
+    if (!p) return;
+    document.getElementById('partModalTitle').textContent = 'Edit Part Entry';
+    document.getElementById('pm-name').value      = p.name;
+    document.getElementById('pm-oem').value       = p.oem;
+    document.getElementById('pm-brand').value     = p.brand;
+    document.getElementById('pm-category').value  = p.category;
+    document.getElementById('pm-makes').value     = p.makes.join(', ');
+    document.getElementById('pm-models').value    = p.models.join(', ');
+    document.getElementById('pm-year-from').value = p.yearFrom||'';
+    document.getElementById('pm-year-to').value   = p.yearTo||'';
+    document.getElementById('pm-afm').value       = p.afm||'';
+    document.getElementById('pm-notes').value     = p.notes||'';
+  } else {
+    document.getElementById('partModalTitle').textContent = 'Add OEM Part Entry';
+    ['pm-name','pm-oem','pm-brand','pm-makes','pm-models','pm-year-from','pm-year-to','pm-afm','pm-notes'].forEach(id => document.getElementById(id).value='');
+    document.getElementById('pm-category').value = 'Brakes';
+    if (prefill) document.getElementById('pm-name').value = prefill;
+  }
+  document.getElementById('partOverlay').classList.add('open');
+  setTimeout(()=>document.getElementById('pm-name').focus(),100);
+}
+
+function savePart() {
+  const name = document.getElementById('pm-name').value.trim();
+  const oem  = document.getElementById('pm-oem').value.trim();
+  if (!name) { alert('Part name is required.'); return; }
+  if (!oem)  { alert('OEM number is required.'); return; }
+
+  const entry = {
+    id:       editPartId || uid(),
+    name,
+    oem:      oem.toUpperCase(),
+    brand:    document.getElementById('pm-brand').value.trim(),
+    category: document.getElementById('pm-category').value,
+    makes:    document.getElementById('pm-makes').value.split(',').map(s=>s.trim()).filter(Boolean),
+    models:   document.getElementById('pm-models').value.split(',').map(s=>s.trim()).filter(Boolean),
+    yearFrom: document.getElementById('pm-year-from').value.trim(),
+    yearTo:   document.getElementById('pm-year-to').value.trim(),
+    afm:      document.getElementById('pm-afm').value.trim(),
+    notes:    document.getElementById('pm-notes').value.trim(),
+  };
+
+  if (editPartId) {
+    const i = parts.findIndex(p => p.id === editPartId);
+    if (i >= 0) parts[i] = entry;
+    toast('Part entry updated ✓');
+  } else {
+    parts.push(entry);
+    toast('Part added to database ✓');
+  }
+
+  saveParts();
+  if (document.getElementById('view-database').classList.contains('active')) renderDB();
+  closeModal('partOverlay');
+}
+
+function deletePartEntry(id) {
+  if (!confirm('Remove this part from the database?')) return;
+  parts = parts.filter(p => p.id !== id);
+  saveParts();
+  renderDB();
+  document.getElementById('detailPanel').innerHTML = `
+    <div class="detail-empty" id="detailEmpty">
+      <div class="detail-empty-icon">📋</div>
+      <h3>Select a Part</h3>
+      <p>Search for a part on the left to see OEM details.</p>
+    </div>`;
+  document.getElementById('addToJobBar').style.display='none';
+  toast('Part removed', 'info');
+}
+
+// ════════════════════════════════════════════════════════
+// MODAL HELPERS
+// ════════════════════════════════════════════════════════
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+function closeOverlay(e, id) {
+  if (e.target.id === id) closeModal(id);
+}
+
+// ════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════
+renderBoard();
+updateDBCount();
+</script>
+</body>
+</html>
